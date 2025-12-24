@@ -6,7 +6,7 @@ export default class ResponseNormalizer {
      * @param {any} rawValue - valeur brute envoyée par le formulaire
      * @returns {Object} réponse normalisée { questionId, type, value }
      */
-    static normalize(step, rawValue) {
+    static normalize(step, rawValue, precisionValue = null) {
       let value;
   
       switch(step.type) {
@@ -17,22 +17,38 @@ export default class ResponseNormalizer {
           break;
   
           case 'single_choice': {
-            const selectedOption = step.options.find(o => String(o.codeItem) === String(rawValue));
-            if (!selectedOption) value = null;
-            else if (selectedOption.requiresPrecision) {
-              value = {  codeItem: selectedOption.codeItem, label: selectedOption.label , precision: precisionValue || '' };
+            const selectedOption = step.options.find(
+              o => String(o.codeItem) === String(rawValue)
+            );
+            if (!selectedOption) {
+              value = null;
+            }else if (selectedOption.requiresPrecision) {
+              value = { 
+                 codeItem: selectedOption.codeItem,
+                  label: selectedOption.label ,
+                   precision: precisionValue?.[selectedOption.codeItem] || ''
+                  };
             } else {
               value = { codeItem: selectedOption.codeItem, label: selectedOption.label };
             }
             break;
           }
   
+         
           case 'multiple_choice': {
             const selectedCodes = Array.isArray(rawValue) ? rawValue : [rawValue];
+          
+            // Si un choix exclusif est sélectionné, ne garder que lui
+            const exclusiveOption = step.options.find(o => o.exclusive && selectedCodes.includes(String(o.codeItem)));
+            let filteredCodes = selectedCodes;
+            if(exclusiveOption) filteredCodes = [String(exclusiveOption.codeItem)];
+          
             value = step.options
-              .filter(o => selectedCodes.includes(String(o.codeItem)))
+              .filter(o => filteredCodes.includes(String(o.codeItem)))
               .map(o => {
-                if (o.requiresPrecision) return { val: { codeItem: o.codeItem, label: o.label }, precision: precisionValue || '' };
+                if (o.requiresPrecision) {
+                  return {  codeItem: o.codeItem, label: o.label , precision: precisionValue[o.codeItem] || '' };
+                }
                 return { codeItem: o.codeItem, label: o.label };
               });
             break;

@@ -1,3 +1,4 @@
+//response.routes.js
 import express from 'express';
 import Response from '../models/Response.js';
 import ResponseNormalizer from '../services/ResponseNormalizer.js';
@@ -45,7 +46,6 @@ router.get('/all', async (req, res) => {
 });
 
 // POST réponse
-// POST réponse
 router.post('/:surveyId/:stepId', async (req, res) => {
   const { surveyId, stepId } = req.params;
   let { responseId } = req.body;
@@ -55,10 +55,29 @@ router.post('/:surveyId/:stepId', async (req, res) => {
   const step = SurveyService.getStep(survey, stepId);
   if (!step) return res.status(404).send('Question introuvable');
 
-  // Récupérer la précision si elle existe
-const precisionValue = req.body[`precision_${req.body.value}`] || null;
-  // Normaliser la réponse
-  const answer = ResponseNormalizer.normalize(step, req.body.value,precisionValue);
+  let rawValue = req.body.value;
+let precisionMap = {};
+
+if (step.type === 'multiple_choice') {
+  if (!Array.isArray(rawValue)) rawValue = [rawValue];
+
+  rawValue.forEach(codeItem => {
+    const key = `precision_${codeItem}`;
+    if (req.body[key]) {
+      precisionMap[codeItem] = req.body[key];
+    }
+  });
+}
+
+if (step.type === 'single_choice') {
+  const key = `precision_${rawValue}`;
+  if (req.body[key]) {
+    precisionMap[rawValue] = req.body[key];
+  }
+}
+
+  // 👉 Normalisation
+  const answer = ResponseNormalizer.normalize(step, rawValue, precisionMap);
 
   try {
     let response;

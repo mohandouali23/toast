@@ -3,7 +3,9 @@
 
   {{#step.options}}
     <label>
-      <input type="checkbox" name="value" value="{{codeItem}}" data-requires-precision="{{requiresPrecision}}">
+      <input type="checkbox" name="value" value="{{codeItem}}"
+             data-requires-precision="{{requiresPrecision}}"
+             data-exclusive="{{exclusive}}">
       {{label}}
     </label>
     <input type="text" name="precision_{{codeItem}}" class="precision-input" style="display:none;" placeholder="Précisez..." />
@@ -13,10 +15,44 @@
 </form>
 
 <script>
-  document.querySelectorAll('input[type=checkbox][name=value]').forEach(cb => {
+  const checkboxes = document.querySelectorAll('input[type=checkbox][name=value]');
+
+  checkboxes.forEach(cb => {
     cb.addEventListener('change', function() {
       const input = document.querySelector(`input[name=precision_${this.value}]`);
-      input.style.display = this.checked && this.dataset.requiresPrecision === 'true' ? 'inline-block' : 'none';
+      input.style.display = this.checked && this.dataset.requiresPrecision==='true' ? 'inline-block' : 'none';
+
+      // Gestion exclusif
+      if(this.dataset.exclusive==='true' && this.checked){
+        // décocher et désactiver les autres
+        checkboxes.forEach(other => {
+          if(other !== this) {
+            other.checked = false;
+            other.disabled = true;
+            document.querySelector(`input[name=precision_${other.value}]`).style.display='none';
+          }
+        });
+      } else if(this.dataset.exclusive!=='true'){
+        // Si un autre est coché, décocher le choix exclusif
+        checkboxes.forEach(excl => {
+          if(excl.dataset.exclusive==='true') {
+            excl.checked = false;
+            excl.disabled = false;
+            document.querySelector(`input[name=precision_${excl.value}]`).style.display='none';
+          }
+        });
+      } else {
+        // réactiver les autres si exclusif décoché
+        checkboxes.forEach(other => {
+          if(other.dataset.exclusive==='true') return;
+          other.disabled = false;
+        });
+      }
     });
+
+    // afficher le champ de précision si déjà sélectionné
+    if(cb.checked && cb.dataset.requiresPrecision==='true'){
+      document.querySelector(`input[name=precision_${cb.value}]`).style.display='inline-block';
+    }
   });
 </script>

@@ -29,16 +29,20 @@
       "options": [
         {
           "codeItem": 1,
-          "label": "Tous les jours"
+          "label": "Tous les jours",
+          "requiresSubQst": {
+            "value": true,
+            "subQst_id": "q7"
+          }
         },
         {
           "codeItem": 2,
-          "label": "Quelques fois par semaine",
-          "requiresPrecision": true
+          "label": "Quelques fois par semaine"
         },
         {
           "codeItem": 5,
-          "label": "Autre"
+          "label": "Autre",
+          "requiresPrecision": true
         }
       ],
       "placeholder": "",
@@ -108,8 +112,17 @@
           "value": "Bus",
           "label": "Bus",
           "requiresSubQst": {
-            "value": true,
-            "subQst_id": "q6"
+            "id": "q6",
+            "type": "spinner",
+            "label": "Choisissez votre région",
+            "options": ["Nord", "Sud", "Est", "Ouest", "Centre"],
+            "subQuestions": [
+              {
+                "id": "q6a",
+                "type": "text",
+                "label": "Pourquoi cette région ?"
+              }
+            ]
           }
         },
         {
