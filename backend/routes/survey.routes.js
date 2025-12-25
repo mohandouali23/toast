@@ -24,6 +24,26 @@ let step = SurveyService.getStep(survey, stepId);
     options = AutoCompleteUtils.getAutocompleteOptions(step);
   }
 
+  // ✅ Préparation GRID générique (colonnes + flags)
+if (step.type === 'gridA' && Array.isArray(step.rows) && Array.isArray(step.columns)) {
+
+  // Préparer les colonnes (flags Mustache)
+  const preparedColumns = step.columns.map(col => ({
+    ...col,
+    isSingleChoice: col.type === 'single_choice',
+    isMultipleChoice: col.type === 'multiple_choice',
+    isText: col.type === 'text',
+    isSpinner: col.type === 'spinner',
+    options: col.options || []
+  }));
+
+  // Injecter les colonnes préparées dans chaque ligne
+  step.rows = step.rows.map(row => ({
+    ...row,
+    columns: preparedColumns
+  }));
+}
+
  //  Injection des colonnes dans chaque ligne (GRID)
  if (step.type === 'grid' && Array.isArray(step.rows) && Array.isArray(step.columns)) {
   step.rows = step.rows.map(row => ({
@@ -32,6 +52,10 @@ let step = SurveyService.getStep(survey, stepId);
     
   }));
 }
+if (step.type === 'gridA') {
+  step = SurveyService.prepareGrid(step);
+}
+
  //  Préparation des flags pour le step
 if (step.type === 'accordion' && Array.isArray(step.sections)) {
   step.sections = step.sections.map(section => ({
@@ -47,7 +71,7 @@ if (step.type === 'accordion' && Array.isArray(step.sections)) {
       return res.status(500).send(err.message);}
    // console.log("step",step)
 
-   // console.log("json step",JSON.stringify(step, null, 2));
+    console.log("json step",JSON.stringify(step, null, 2));
 
     res.render('layout', { survey, step, content: html });
   });

@@ -13,7 +13,7 @@
       "label": "Quel est votre moyen de transport principal ?",
       "placeholder": "Ex : Bus, Train, Voiture...",
       "help_text": "Indiquez le moyen que vous utilisez le plus souvent",
-      "redirection": "q33",
+      "redirection": "q12",
       "input_cond": "",
       "output_cond": "value.length > 0",
       "required": true,
@@ -128,7 +128,41 @@
         "default": "redirection"
       }
     },
-
+    {
+      "id": "q12",
+      "type": "gridA",
+      "title": "Q12.",
+      "label": "Activités pratiquées et motivation principale du séjour",
+      "required": true,
+    
+      "rows": [
+        { "id": "walk", "label": "Se promener, flâner" },
+        { "id": "museum", "label": "Visites de musées, monuments" },
+        { "id": "nature", "label": "Parcs, jardins, sites naturels" },
+        { "id": "guided", "label": "Visites guidées de quartiers" }
+      ],
+    
+      "columns": [
+        {
+          "id": "activity",
+          "label": "Activités pratiquées",
+          "type": "multiple_choice"
+         
+        },
+        {
+          "id": "reason",
+          "label": "Motivation principale du séjour",
+          "type": "single_choice"
+         
+        }
+      ],
+    
+      "rules": {
+        "atLeastOneActivity": true,
+        "oneMainReason": true
+      }
+    }
+,    
 
     {
       "id": "q20",

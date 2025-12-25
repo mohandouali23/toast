@@ -1,0 +1,46 @@
+<form method="POST" action="/api/responses/{{survey.id}}/{{step.id}}">
+
+<table class="grid-table">
+  <thead>
+    <tr>
+      <th></th>
+      {{#step.columns}}
+        <th>{{label}}</th>
+      {{/step.columns}}
+    </tr>
+  </thead>
+
+  <tbody>
+    {{#step.rows}}
+    <tr>
+      <td class="row-label">{{label}}</td>
+
+      {{#columns}}
+      <td>
+
+        {{#isMultipleChoice}}
+          <input
+            type="checkbox"
+            name="value[{{../id}}][]"
+            value="{{id}}"
+          >
+        {{/isMultipleChoice}}
+
+        {{#isSingleChoice}}
+          <input
+            type="radio"
+            name="value[{{../id}}]"
+            value="{{id}}"
+          >
+        {{/isSingleChoice}}
+
+      </td>
+      {{/columns}}
+
+    </tr>
+    {{/step.rows}}
+  </tbody>
+</table>
+
+<button type="submit">Suivant</button>
+</form>

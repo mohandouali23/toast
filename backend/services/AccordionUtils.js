@@ -1,6 +1,19 @@
 // AccordionUtils.js
 export default class AccordionUtils {
-
+  // static prepareQuestionFlags(q) {
+  //   const prepared = { ...q };
+  
+  //   // Déterminer quel template inclure
+  //   prepared.template = `questions/${q.type}`; // ex: "questions/single_choice"
+    
+  //   prepared.isText = q.type === 'text';
+  //   prepared.isSpinner = q.type === 'spinner';
+  //   prepared.isSingleChoice = q.type === 'single_choice';
+  //   prepared.isMultipleChoice = q.type === 'multiple_choice';
+  //   prepared.isAccordion = q.type === 'accordion';
+    
+  //   return prepared;
+  // }
     // Prépare les flags pour toutes les questions (Mustache)
     static prepareQuestionFlags(q) {
       return {
@@ -17,5 +30,8 @@ export default class AccordionUtils {
         columns: q.columns || [],
       };
     }
+
+ 
+
   }
   

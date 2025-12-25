@@ -34,4 +34,16 @@ export default class SurveyService {
       return [];
     }
   }
+
+  static prepareGrid(step) {
+    step.columns = step.columns.map(col => ({
+      ...col,
+      isMultipleChoice: col.type === 'multiple_choice',
+      isSingleChoice: col.type === 'single_choice',
+      options: col.options || []
+    }));
+  
+    return step;
+  }
+  
 }
