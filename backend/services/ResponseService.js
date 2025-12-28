@@ -10,7 +10,7 @@ export default class ResponseService {
    */
 
   // Créer un nouveau questionnaire pour un utilisateur
-  static async createSurveyDocument(surveyId, userId) {
+  static async createSurveyDocument(surveyId, userId,answer) {
     const response = new Response({
       surveyId,
       userId,
@@ -25,7 +25,13 @@ export default class ResponseService {
     const response = await Response.findById(responseId);
     if (!response) throw new Error('Document introuvable');
 
-    response.answers.push(answer);
+   // response.answers.push(answer);
+   response.answers = new Map([
+    ...response.answers,
+    ...Object.entries(answer)
+  ]);
+  
+
     await response.save();
     return response;
   }
@@ -42,12 +48,16 @@ export default class ResponseService {
         response = new Response({
           surveyId,
           userId,
-          answers: []
+          answers: {} // objet vide
         });
       }
-
-      // Ajouter la nouvelle réponse
-      response.answers.push(answer);
+  
+      // Ajouter la nouvelle réponse à la Map
+      response.answers = new Map([
+        ...response.answers,
+        ...Object.entries(answer)
+      ]);
+  
       await response.save();
       return response;
     } catch (err) {
@@ -55,13 +65,14 @@ export default class ResponseService {
       throw err;
     }
   }
+  
 
   static async createResponse(surveyId, userId, answer) {
     try {
       const response = new Response({
         surveyId,
         userId,
-        answers: [answer]  // chaque document commence avec la première réponse
+        answers: answer  // chaque document commence avec la première réponse
       });
       await response.save();
       return response;
@@ -71,65 +82,5 @@ export default class ResponseService {
     }
   }
 
-//   static async markCompleted(responseId) {
-//   const response = await Response.findById(responseId);
-//   if (!response) throw new Error('Document introuvable');
-
-//   response.completed = true;
-//   await response.save();
-//   return response;
-// }
-
 }
 
-
-
-// import Response from '../models/Response.js';
-
-// export default class ResponseService {
-// // Créer un nouveau questionnaire pour un utilisateur
-//   static async createSurveyDocument(surveyId, userId) {
-//     const response = new Response({ surveyId, userId, answers: [], completed: false });
-//     await response.save();
-//     return response;
-//   }
-// // Ajouter une réponse à un document existant
-//   static async addAnswer(responseId, answer) {
-//     const response = await Response.findById(responseId);
-//     if (!response) throw new Error('Document introuvable');
-
-//     response.answers.push(answer);
-//     await response.save();
-//     return response;
-//   }
-// // Obtenir le dernier document non terminé pour un user
-//   static async getLatestResponse(surveyId, userId) {
-//     return await Response.findOne({ surveyId, userId }).sort({ createdAt: -1 });
-//   }
-
-//   static async saveAnswer(surveyId, userId, answer) {
-//     let response = await Response.findOne({ surveyId, userId });
-//     if (!response) {
-//       response = new Response({ surveyId, userId, answers: [], completed: false });
-//     }
-
-//     response.answers.push(answer);
-//     await response.save();
-//     return response;
-//   }
-
-//   static async createResponse(surveyId, userId, answer) {
-//     const response = new Response({ surveyId, userId, answers: [answer], completed: false });
-//     await response.save();
-//     return response;
-//   }
-
-//   static async markCompleted(responseId) {
-//     const response = await Response.findById(responseId);
-//     if (!response) throw new Error('Document introuvable');
-
-//     response.completed = true;
-//     await response.save();
-//     return response;
-//   }
-// }

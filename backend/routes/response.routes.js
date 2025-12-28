@@ -5,6 +5,7 @@ import ResponseNormalizer from '../services/ResponseNormalizer.js';
 import SurveyService from '../services/SurveyService.js';
 import ResponseService from '../services/ResponseService.js';
 
+
 const router = express.Router();
 // Middleware pour logger toutes les requêtes
 // router.use((req, res, next) => {
@@ -32,6 +33,7 @@ router.get('/survey/:surveyId', async (req, res) => {
     }
   });
 
+
 /* GET : récupérer toutes les documents Response */
 router.get('/all', async (req, res) => {
   try {
@@ -42,6 +44,9 @@ router.get('/all', async (req, res) => {
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });
+
+
+
 
 // POST réponse
 router.post('/:surveyId/:stepId', async (req, res) => {
@@ -99,6 +104,8 @@ console.log('test',responseId,answer)
       response = await ResponseService.addAnswer(responseId, answer);
       
     }
+//     const formatted = ResponseFormatter.formatResponse(response, './backend/data/survey_666.json');
+// console.log(formatted);
     responseId = response._id;
   } catch (err) {
     return res.status(500).send('Erreur sauvegarde réponse');
@@ -111,9 +118,14 @@ console.log('test',responseId,answer)
   answer.value
 );
   if (!next) {
-  // Redirection vers la page finale
+  
   return res.redirect(`/survey/${surveyId}/end`);
 }
   res.redirect(`/survey/${surveyId}/${next}?responseId=${responseId}`);
 });
+
+
+
+
+
 export default router;
