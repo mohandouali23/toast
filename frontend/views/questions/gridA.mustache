@@ -26,13 +26,14 @@
       >
     {{/isMultipleChoice}}
 
-    {{#isSingleChoice}}
-      <input
-        type="radio"
-        name="value[{{idRow}}][{{idCol}}]"    
-        value="{{idRow}}"           
-      >
-    {{/isSingleChoice}}
+   {{#isSingleChoice}}
+<input
+  type="radio"
+  name="value[{{idCol}}]"
+  value="{{idRow}}"
+/>
+{{/isSingleChoice}}
+
   </td>
   {{/columns}}
 </tr>

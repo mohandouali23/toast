@@ -203,7 +203,8 @@
         { "id": "velib", "label": "Vélos en libre-service" }
       ],
       "columns": [
-        { "value": "yes", "label": "Oui" },
+        { "value": "yes", 
+        "label": "Oui" },
         { "value": "no", "label": "Non" }
       ],
       "rules": {

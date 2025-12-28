@@ -24,7 +24,7 @@ let step = SurveyService.getStep(survey, stepId);
     options = AutoCompleteUtils.getAutocompleteOptions(step);
   }
 
-  // ✅ Préparation GRID générique (colonnes + flags)
+  //  Préparation GRID générique (colonnes + flags)
 if (step.type === 'gridA' && Array.isArray(step.rows) && Array.isArray(step.columns)) {
   step.rows = step.rows.map(row => ({
     ...row,
