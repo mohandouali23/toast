@@ -7,125 +7,57 @@ import ResponseService from '../services/ResponseService.js';
 
 
 const router = express.Router();
-// Middleware pour logger toutes les requêtes
-// router.use((req, res, next) => {
-//   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-//   console.log('Body:', req.body);
-//   next();
-// });
-
-/* GET : récupérer toutes les réponses d’un questionnaire (par surveyId) */
-/* URL : /api/responses/survey/:surveyId */
-router.get('/survey/:surveyId', async (req, res) => {
-    try {
-      const { surveyId } = req.params;
-  
-      const responses = await Response.find({ surveyId });
-  
-      res.status(200).json({
-        surveyId,
-        count: responses.length,
-        responses
-      });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Erreur serveur' });
-    }
-  });
-
-
-/* GET : récupérer toutes les documents Response */
-router.get('/all', async (req, res) => {
-  try {
-    const responses = await Response.find();
-    res.status(200).json(responses);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur serveur' });
-  }
-});
-
-
-
-
-// POST réponse
-router.post('/:surveyId/:stepId', async (req, res) => {
-  const { surveyId, stepId } = req.params;
-  let { responseId } = req.body;
-
-  const userId = req.body.userId || 'anonymous';
+router.post('/:surveyId/run', async (req, res) => {
+  const { surveyId } = req.params;
+  const action = req.body.action || 'next'; // next par défaut
+  const userId = 'anonymous';
 
   const survey = SurveyService.loadSurvey(surveyId);
-  const step = SurveyService.getStep(survey, stepId);
-  if (!step) return res.status(404).send('Question introuvable');
+  let pageNumber = req.session.pageNumber;
+  const responseId = req.session.responseId;
 
-  let rawValue;
-
-if (step.type === 'accordion') {
-  rawValue = req.body; // on passe TOUT
-  console.log('RAW Accordion Value:', rawValue);
-} else {
-  rawValue = req.body.value;
-}
-
-let precisionMap = {};
-
-if (step.type === 'multiple_choice') {
-  if (!Array.isArray(rawValue)) rawValue = [rawValue];
-
-  rawValue.forEach(codeItem => {
-    const key = `precision_${codeItem}`;
-    if (req.body[key]) {
-      precisionMap[codeItem] = req.body[key];
-    }
-  });
-}
-
-if (step.type === 'single_choice') {
-  rawValue = req.body[step.id]; 
-  console.log("rawvalue",rawValue)
-  const key = `precision_${rawValue}`;
-  if (req.body[key]) {
-    precisionMap[rawValue] = req.body[key];
-  }
-}
- console.log("rawvalue",rawValue)
-  // Normalisation
-  const answer = ResponseNormalizer.normalize(step, rawValue, precisionMap);
+  const stepsOnPage = survey.steps.filter(step => step.page === pageNumber);
 
   try {
-    let response;
-    if (!responseId) {
-      // Première réponse → créer le document
-      response = await ResponseService.createResponse(surveyId, userId, answer);
-    } else {
-      // Document existant → ajouter la réponse
-console.log('test',responseId,answer)
-      response = await ResponseService.addAnswer(responseId, answer);
-      
+     
+    // Sauvegarder ou mettre à jour les réponses
+    for (const step of stepsOnPage) {
+      let rawValue = req.body[step.id];
+
+      if (step.type === 'accordion' || step.type === 'grid') {
+        rawValue = req.body;
+      }
+console.log("rawvalue",rawValue)
+      const answer = ResponseNormalizer.normalize(step, rawValue, {});
+      console.log("answer",answer)
+      //  Mise à jour existante ou insertion
+      await ResponseService.addAnswer(responseId, answer);
     }
-//     const formatted = ResponseFormatter.formatResponse(response, './backend/data/survey_666.json');
-// console.log(formatted);
-    responseId = response._id;
+
+    // Déterminer la page suivante ou précédente
+    const pages = [...new Set(survey.steps.map(s => s.page))].sort((a,b)=>a-b);
+    let index = pages.indexOf(pageNumber);
+
+    if (action === 'prev') {
+      index = Math.max(0, index - 1);
+    } else {
+      index = index + 1;
+    }
+
+    const nextPage = pages[index];
+
+    if (nextPage === undefined) {
+      req.session.destroy();
+      return res.redirect(`/survey/${surveyId}/end`);
+    }
+
+    req.session.pageNumber = nextPage;
+    res.redirect(`/survey/${surveyId}/run`);
+
   } catch (err) {
-    return res.status(500).send('Erreur sauvegarde réponse');
+    console.error(err);
+    res.status(500).send('Erreur sauvegarde réponses');
   }
-  // Redirection vers la prochaine question
-  //const next = SurveyService.getNextStep(step);
-  const next = SurveyService.getNextStep(
-  survey,
-  step,
-  answer.value
-);
-  if (!next) {
-  
-  return res.redirect(`/survey/${surveyId}/end`);
-}
-  res.redirect(`/survey/${surveyId}/${next}?responseId=${responseId}`);
 });
-
-
-
-
 
 export default router;

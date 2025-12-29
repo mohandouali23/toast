@@ -7,96 +7,118 @@ import AccordionUtils from '../services/AccordionUtils.js';
 import Response from '../models/Response.js';
 import path from 'path';
 import ExcelService from '../services/ExcelService.js';
-
+import ResponseService from '../services/ResponseService.js';
 
 const router = express.Router();
-// Route pour générer le fichier Excel et le télécharger
+
+// ------------------ Télécharger Excel ------------------
 router.get('/:surveyId/download', async (req, res) => {
   const { surveyId } = req.params;
-
   try {
     const responses = await Response.find({ surveyId });
     const surveyFile = path.resolve(`./backend/data/${surveyId}.json`);
     const outputFile = path.resolve(`./backend/data/${surveyId}_responses.xlsx`);
-    console.log("Fichier survey:", surveyFile);
-
     await ExcelService.generateExcelWide(responses, surveyFile, outputFile);
-
-    // Télécharger le fichier
     res.download(outputFile);
   } catch (err) {
     console.error(err);
     res.status(500).send('Erreur génération Excel');
   }
 });
-
+// ------------------ Page de fin ------------------
 router.get('/:surveyId/end', (req, res) => {
   const { surveyId } = req.params;
   const survey = SurveyService.loadSurvey(surveyId);
-  const firstStepId = survey.steps[0].id;
 
+  // Nettoyer la session (fin de parcours)
+  req.session.destroy(err => {
+    if (err) console.error('Erreur destruction session:', err);
+  });
+console.log("sessiondestroy")
   const step = { type: 'end', id: 'end', title: 'Fin du questionnaire' };
 
-  // Rendu du contenu du end.mustache
-  // On injecte l'URL de téléchargement du fichier Excel
   res.render('end', { 
-    surveyId, 
-    firstStepId,
-    downloadUrl: `/survey/${surveyId}/download` 
+    surveyId,
+    restartUrl: `/survey/${surveyId}/run`,
+    downloadUrl: `/survey/${surveyId}/download`
   }, (err, html) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Erreur lors du rendu de la page de fin');
     }
 
-    // Injecte le HTML de la page de fin dans le layout
     res.render('layout', { survey, step, content: html });
   });
 });
 
 
-// Route pour afficher les questions
-router.get('/:surveyId/:stepId', async (req, res, next) => {
-  if (req.params.stepId === 'end') return next(); // passe à la route /end
+// ------------------ Utilitaire : récupérer steps par page ------------------
 
-  const { surveyId, stepId } = req.params;
-  const responseId = req.query.responseId;
-  const userId = req.query.userId || 'anonymous';
-
+function prepareStepForPage(step) {
+  // Flags pour Mustache
+  step.type_text = step.type === 'text';
+  step.type_single_choice = step.type === 'single_choice';
+  step.type_multiple_choice = step.type === 'multiple_choice';
+  step.type_spinner = step.type === 'spinner';
+  step.type_autocomplete = step.type === 'autocomplete';
+  step.type_grid = step.type === 'grid';
+  step.type_accordion = step.type === 'accordion';
+  return step;
+}
+// ------------------ Route pages dynamiques ------------------
+router.get('/:surveyId/run', async (req, res) => {
+  const { surveyId } = req.params;
   const survey = SurveyService.loadSurvey(surveyId);
-let step = SurveyService.getStep(survey, stepId);
-  if (!step) return res.status(404).send('Question introuvable');
 
-  let options = [];
-  if (step.type === 'autocomplete') {
-    options = AutoCompleteUtils.getAutocompleteOptions(step);
+  // Toujours initialiser une nouvelle session
+  if (!req.session.pageNumber) {
+    req.session.pageNumber = survey.steps[0].page;
   }
 
-if (step.type === 'grid') {
-  step = SurveyService.prepareGridB(step);
-  console.log('gridB',step)
-}
+  //  TOUJOURS créer un nouveau document au démarrage
+  if (!req.session.responseId) {
+    const response = await ResponseService.createSurveyDocument(
+      surveyId,
+      'anonymous',
+      {}
+    );
+    req.session.responseId = response._id;
+    console.log('🆕 Nouveau responseId:', response._id);
+  }
 
- //  Préparation des flags pour le step
-if (step.type === 'accordion' && Array.isArray(step.sections)) {
-  step.sections = step.sections.map(section => ({
-    ...section,
-    questions: section.questions.map(q => AccordionUtils.prepareQuestionFlags(q))
-  }));
-} else {
-  step = AccordionUtils.prepareQuestionFlags(step);
-}
-  res.render(`questions/${step.type}`, { survey, step, options, responseId }, (err, html) => {
-    if (err) {
-      console.log("step err",err)
-      return res.status(500).send(err.message);}
+  const pageNumber = req.session.pageNumber;
 
-    res.render('layout', { survey, step, content: html });
+  const stepsOnPage = survey.steps.filter(step => step.page === pageNumber);
+  let options = [];
+  const preparedSteps = stepsOnPage.map(step => {
+    
+    if (step.type === 'grid') step = SurveyService.prepareGridB(step);
+    if (step.type === 'autocomplete') {
+      options = AutoCompleteUtils.getAutocompleteOptions(step);
+    }
+    if (step.type === 'accordion') {
+      step.sections = step.sections.map(section => ({
+        ...section,
+        questions: section.questions.map(q =>
+          AccordionUtils.prepareQuestionFlags(q)
+        )
+      }));
+    }
+    return prepareStepForPage(step);
+  });
+
+  // preparedSteps.forEach(step => async{
+  //   const response = await ResponseService.getLatestResponse(surveyId, 'anonymous');
+  //   if (response?.answers?.has(step.id)) {
+  //     step.value = response.answers.get(step.id).value; // ou answer.value selon structure
+  //   }
+  // });
+  
+  res.render('questions/page', {
+    survey,
+    steps: preparedSteps,
+    options
   });
 });
-
-
-
-
 
 export default router;

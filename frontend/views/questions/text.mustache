@@ -1,8 +1,6 @@
 <h2>{{step.title}}</h2>
 <p>{{step.label}}</p>
+<div>
+<input type="text" name="{{id}}" value="{{value}}" placeholder="{{placeholder}}" required>
+</div>
 
-<form method="POST" action="/api/responses/{{survey.id}}/{{step.id}}">
-<input type="hidden" name="responseId" value="{{responseId}}">
-  <input type="text" name="value" placeholder="{{step.placeholder}}" required>
-  <button type="submit">Suivant</button>
-</form>

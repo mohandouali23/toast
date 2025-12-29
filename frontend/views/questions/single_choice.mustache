@@ -1,30 +1,25 @@
-<h2>{{step.title}}</h2>
-<p>{{step.label}}</p>
 
-<form method="POST" action="/api/responses/{{survey.id}}/{{step.id}}">
-<input type="hidden" name="responseId" value="{{responseId}}">
- 
-  {{#step.options}}
-    <label>
-      <input type="radio" name="{{step.id}}" value="{{codeItem}}" required 
-      data-requires-precision="{{requiresPrecision}}">
-      
-      {{label}}
-    </label><br>
-     <input type="text" name="precision_{{codeItem}}" class="precision-input" style="display:none;" placeholder="Précisez..." />
-  {{/step.options}}
+{{#options}}
+  <label>
+    <input type="radio" name="{{id}}" value="{{codeItem}}" 
+           data-requires-precision="{{requiresPrecision}}">
+    {{label}}
+  </label><br>
+  <input type="text" name="precision_{{codeItem}}" class="precision-input" style="display:none;" placeholder="Précisez..." />
+{{/options}}
 
-  <button type="submit">Suivant</button>
-  
-</form>
+
 <script>
-  // Afficher le champ précision si nécessaire
-  document.querySelectorAll('input[type=radio][name={{step.id}}]').forEach(radio => {
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('input[type=radio][name={{id}}]').forEach(radio => {
     radio.addEventListener('change', function() {
       document.querySelectorAll('.precision-input').forEach(i => i.style.display='none');
       if(this.dataset.requiresPrecision === 'true'){
-        document.querySelector(`input[name=precision_${this.value}]`).style.display='inline-block';
+        const precisionInput = document.querySelector(`input[name=precision_${this.value}]`);
+        if (precisionInput) precisionInput.style.display='inline-block';
       }
     });
   });
+});
 </script>
+

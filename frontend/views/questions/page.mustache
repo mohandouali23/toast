@@ -1,0 +1,45 @@
+<h1>{{survey.title}}</h1>
+
+<form id="surveyForm" method="POST" action="/api/responses/{{survey.id}}/run">
+  {{#steps}}
+    <div class="question-block" style="margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+      {{#title}}<h4>{{title}}</h4>{{/title}}
+      {{#label}}<h4>{{label}}</h4>{{/label}}
+      {{#description}}<p>{{description}}</p>{{/description}}
+      
+      {{#type_text}}{{> questions/text}}{{/type_text}}
+      {{#type_single_choice}}{{> questions/single_choice}}{{/type_single_choice}}
+      {{#type_multiple_choice}}{{> questions/multiple_choice}}{{/type_multiple_choice}}
+      {{#type_spinner}}{{> questions/spinner}}{{/type_spinner}}
+      {{#type_autocomplete}}{{> questions/autocomplete}}{{/type_autocomplete}}
+      {{#type_grid}}{{> questions/grid}}{{/type_grid}}
+      {{#type_accordion}}{{> questions/accordion}}{{/type_accordion}}
+    </div>
+  {{/steps}}
+
+  
+  <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+    <button type="submit" name="action" value="prev" style="background-color:#6c757d; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; font-size:16px;">
+      Précédent
+    </button>
+
+    <button type="submit" name="action" value="next" style="background-color:#007bff; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; font-size:16px;">
+      Suivant
+    </button>
+  </div>
+</form>
+
+
+<script> 
+
+document.getElementById('surveyForm').addEventListener('submit', function(e) {
+  
+console.log("Le bouton a été cliqué !");
+
+ // Pour tester la valeur de chaque input 
+const formData = new FormData(this);
+  for (let [name, value] of formData.entries()) {
+     console.log(name, ":", value); 
+     } 
+});
+</script>

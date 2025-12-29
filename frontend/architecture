@@ -32,6 +32,10 @@
 // │   │       ├── single_choice.mustache  # Template pour question à choix unique
 // │   │       ├── multiple_choice.mustache # Template pour question à choix multiples
 // │   │       ├── accordian.mustache      
+// │   │       ├── spinner.mustache
+// │   │       ├── grid.mustache   
+// │   │       ├── autocomplete.mustache      
+// │   │       ├── page.mustache   
 // │   │
 // │   └── public/                      # Fichiers statiques accessibles côté client
 // │       ├── css/

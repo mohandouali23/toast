@@ -1,47 +1,41 @@
-<form method="POST" action="/api/responses/{{survey.id}}/{{step.id}}">
-  <input type="hidden" name="responseId" value="{{responseId}}">
+<table class="grid-table">
+  <thead>
+    <tr>
+      <th></th>
+      {{#reponses}}
+        <th>{{label}}</th>
+      {{/reponses}}
+    </tr>
+  </thead>
 
-  <table class="grid-table">
-    <thead>
-      <tr>
-        <th></th>
-        {{#step.reponses}}
-          <th>{{label}}</th>
-        {{/step.reponses}}
-      </tr>
-    </thead>
+  <tbody>
+    {{#questions}}  
+    <tr>
+      <td class="row-label">{{label}}</td>
 
-    <tbody>
-      {{#step.questions}}  <!-- rows -->
-      <tr>
-        <td class="row-label">{{label}}</td>
+      {{#columns}}  
+      <td class="grid-cell">
+        {{#isRadio}}
+          <input
+            type="radio"
+            name="{{name}}"       
+            value="{{value}}"
+            {{#checked}}checked{{/checked}}
+          >
+        {{/isRadio}}
 
-        {{#columns}}  <!-- columns générés par prepareGridB -->
-        <td class="grid-cell">
-          {{#isRadio}}
-            <input
-              type="radio"
-              name="{{name}}"
-              value="{{value}}"
-              {{#checked}}checked{{/checked}}
-            >
-          {{/isRadio}}
+        {{#isCheckbox}}
+          <input
+            type="checkbox"
+            name="{{name}}"     
+            value="{{value}}"
+            {{#checked}}checked{{/checked}}
+          >
+        {{/isCheckbox}}
+      </td>
+      {{/columns}}
 
-          {{#isCheckbox}}
-            <input
-              type="checkbox"
-              name="{{name}}"
-              value="{{value}}"
-              {{#checked}}checked{{/checked}}
-            >
-          {{/isCheckbox}}
-        </td>
-        {{/columns}}
-
-      </tr>
-      {{/step.questions}}
-    </tbody>
-  </table>
-
-  <button type="submit">Suivant</button>
-</form>
+    </tr>
+    {{/questions}}
+  </tbody>
+</table>

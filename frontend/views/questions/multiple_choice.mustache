@@ -1,59 +1,49 @@
-<form method="POST" action="/api/responses/{{survey.id}}/{{step.id}}">
-  <input type="hidden" name="responseId" value="{{responseId}}">
+{{#options}}
+  <label>
+    <input type="checkbox" name="{{id}}[]" value="{{codeItem}}"
+           data-requires-precision="{{requiresPrecision}}"
+           data-exclusive="{{exclusive}}">
+    {{label}}
+  </label>
+  <input type="text" name="precision_{{id}}_{{codeItem}}" class="precision-input" style="display:none;" placeholder="Précisez..." />
 
-  {{#step.options}}
-    <label>
-      <input type="checkbox" name="value" value="{{codeItem}}"
-             data-requires-precision="{{requiresPrecision}}"
-             data-exclusive="{{exclusive}}">
-      {{label}}
-    </label>
-    <input type="text" name="precision_{{codeItem}}" class="precision-input" style="display:none;" placeholder="Précisez..." />
-
-    {{#requiresSubQst}}
-  <div class="sub-question" style="display:none;">
-   <input type="text" name="precision_{{codeItem}}" class="precision-input" style="display:none;" placeholder="Précisez..." />
-  </div>
-{{/requiresSubQst}}
-
-
-  {{/step.options}}
-
-  <button type="submit">Suivant</button>
-</form>
+  {{#requiresSubQst}}
+    <div class="sub-question" style="display:none;">
+      <input type="text" name="sub_{{../id}}_{{codeItem}}" placeholder="Sous-question..." />
+    </div>
+  {{/requiresSubQst}}
+{{/options}}
 
 <script>
-  const checkboxes = document.querySelectorAll('input[type=checkbox][name=value]');
+document.addEventListener('DOMContentLoaded', function() {
+  const checkboxes = document.querySelectorAll('input[type=checkbox][name="{{id}}[]"]');
 
   checkboxes.forEach(cb => {
     cb.addEventListener('change', function() {
-      const input = document.querySelector(`input[name=precision_${this.value}]`);
+      const input = document.querySelector(`input[name=precision_{{id}}_${this.value}]`);
       input.style.display = this.checked && this.dataset.requiresPrecision==='true' ? 'inline-block' : 'none';
 
       const subQ = this.closest('form').querySelector(`.sub-question`);
-    if(subQ) subQ.style.display = this.checked ? 'block':'none';
+      if(subQ) subQ.style.display = this.checked ? 'block':'none';
 
       // Gestion exclusif
       if(this.dataset.exclusive==='true' && this.checked){
-        // décocher et désactiver les autres
         checkboxes.forEach(other => {
-          if(other !== this) {
+          if(other !== this){
             other.checked = false;
             other.disabled = true;
-            document.querySelector(`input[name=precision_${other.value}]`).style.display='none';
+            document.querySelector(`input[name=precision_{{id}}_${other.value}]`).style.display='none';
           }
         });
       } else if(this.dataset.exclusive!=='true'){
-        // Si un autre est coché, décocher le choix exclusif
         checkboxes.forEach(excl => {
-          if(excl.dataset.exclusive==='true') {
+          if(excl.dataset.exclusive==='true'){
             excl.checked = false;
             excl.disabled = false;
-            document.querySelector(`input[name=precision_${excl.value}]`).style.display='none';
+            document.querySelector(`input[name=precision_{{id}}_${excl.value}]`).style.display='none';
           }
         });
       } else {
-        // réactiver les autres si exclusif décoché
         checkboxes.forEach(other => {
           if(other.dataset.exclusive==='true') return;
           other.disabled = false;
@@ -63,7 +53,8 @@
 
     // afficher le champ de précision si déjà sélectionné
     if(cb.checked && cb.dataset.requiresPrecision==='true'){
-      document.querySelector(`input[name=precision_${cb.value}]`).style.display='inline-block';
+      document.querySelector(`input[name=precision_{{id}}_${cb.value}]`).style.display='inline-block';
     }
   });
+});
 </script>

@@ -8,6 +8,7 @@ import responseRoutes from './routes/response.routes.js';
 import dotenv from 'dotenv';
 import logger from './middlewares/logger.js';
 import noCache from './middlewares/noCache.js';
+import session from 'express-session';
 dotenv.config();
 
 const app = express();
@@ -31,6 +32,14 @@ app.use(bodyParser.json());
 //app.use(logger);
 app.use(noCache);
 
+app.use(session({
+    secret: 'survey-secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      httpOnly: true
+    }
+  }));
 /* ROUTES */
 app.use('/survey', surveyRoutes);          // afficher questions
 app.use('/api/responses', responseRoutes); // CRUD réponses

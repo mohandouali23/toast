@@ -4,6 +4,32 @@ export default class ResponseNormalizer {
     let value;
 
     switch(step.type) {
+      case 'accordion': {
+        value = {};
+      
+        if (!rawValue || typeof rawValue !== 'object') break;
+      
+        step.sections.forEach(section => {
+          const sectionId = section.id_sect;
+          value[sectionId] = {};
+      
+          section.questions.forEach(question => {
+            const answer = rawValue[question.id];
+            if (answer === undefined) return;
+      
+            // Appel récursif
+            const normalized = ResponseNormalizer.normalize(question, answer);
+      
+            // Prendre la première valeur de l'objet retourné (il n'y a qu'une clé)
+            const firstKey = Object.keys(normalized)[0];
+            value[sectionId][question.id] = normalized[firstKey];
+          });
+        });
+      
+        break;
+      }
+      
+      
       case 'text':
       case 'spinner':
         value = rawValue;
@@ -23,37 +49,92 @@ export default class ResponseNormalizer {
         value = rawValue;
         break;
 
-      case 'multiple_choice':
-        value = Array.isArray(rawValue) ? rawValue : [rawValue];
-        break;
-
+        case 'multiple_choice': {
+          if (!rawValue) {
+            value = null;
+            break;
+          }
+          // rawValue peut être un array ou une string
+          if (Array.isArray(rawValue)) {
+            value = rawValue.join('/'); // concatène les valeurs avec /
+          } else {
+            value = rawValue.toString();
+          }
+          break;
+        }
         
-        case 'grid':
-      
-        // rawValue doit être de type { questionId: { responseId: [questionId,...] } } ou { questionId: responseId }
-        value = {};
-        if (rawValue && typeof rawValue === 'object') {
-          step.questions.forEach(q => {
-            const rawAnswer = rawValue[q.id];
-            if (rawAnswer !== undefined) {
-              if (typeof rawAnswer === 'object' && !Array.isArray(rawAnswer)) {
-                // On prend juste la clé (responseId) pour radio ou checkbox
-                const keys = Object.keys(rawAnswer);
-                if (keys.length === 1) {
-                  const key = keys[0];
-                  // Si c'est un array, on garde array, sinon on prend juste la clé
-                  value[q.id] = Array.isArray(rawAnswer[key]) ? [key] : key;
-                } else {
-                  // plusieurs réponses ? on prend toutes les clés
-                  value[q.id] = keys;
-                }
-              } else {
-                value[q.id] = rawAnswer;
+        case 'grid': {
+          value = {};
+          if (!rawValue || typeof rawValue !== 'object') break;
+          const data = rawValue.value || rawValue; // <-- prendre la vraie valeur
+
+          const responsesById = {};
+          step.reponses.forEach(r => (responsesById[r.id] = r));
+        
+          step.questions.forEach(question => {
+            const rawAnswer = data[question.id];
+            if (rawAnswer === undefined) return;
+        
+            /* ===========================
+               AXE ROW + RADIO
+               =========================== */
+            if (typeof rawAnswer === 'string') {
+              const response = responsesById[rawAnswer];
+              if (
+                response &&
+                response.input.axis === 'row' &&
+                response.input.type === 'radio'
+              ) {
+                value[question.id] = rawAnswer;
               }
+              return;
+            }
+        
+            /* ===========================
+               CHECKBOX (row / column)
+               =========================== */
+            if (typeof rawAnswer === 'object') {
+              Object.keys(rawAnswer).forEach(responseId => {
+                const response = responsesById[responseId];
+                if (!response) return;
+        
+                const axis = response.input.axis;
+        
+                // ----- AXE ROW -----
+                if (axis === 'row') {
+                  value[question.id] = value[question.id]
+                    ? `${value[question.id]}/${responseId}`
+                    : responseId;
+                }
+        
+                // ----- AXE COLUMN -----
+                if (axis === 'column') {
+                  value[responseId] = value[responseId]
+                    ? `${value[responseId]}/${question.id}`
+                    : question.id;
+                }
+              });
             }
           });
+        
+          /* ===========================
+             RADIO + AXE COLUMN (racine)
+             =========================== */
+          Object.keys(data).forEach(key => {
+            const response = responsesById[key];
+            if (
+              response &&
+              response.input.axis === 'column' &&
+              response.input.type === 'radio'
+            ) {
+              value[key] = data[key];
+            }
+          });
+        
+          break;
         }
-        break;
+        
+        
 
       default:
         value = rawValue;

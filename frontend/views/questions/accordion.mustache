@@ -1,10 +1,8 @@
-<form method="POST" action="/api/responses/{{survey.id}}/{{step.id}}">
-  <input type="hidden" name="responseId" value="{{responseId}}">
 
   <div class="accordion-question">
-    <h3>{{step.title}} {{step.label}}</h3>
+    <h3>{{title}} {{label}}</h3>
 
-    {{#step.sections}}
+    {{#sections}}
       <div class="accordion-section">
         <div class="accordion-header">
           {{title}}
@@ -16,11 +14,9 @@
           {{/questions}}
         </div>
       </div>
-    {{/step.sections}}
+    {{/sections}}
   </div>
 
-  <button type="submit">Suivant</button>
-</form>
 
 <script>
 document.querySelectorAll('.accordion-header').forEach(header => {

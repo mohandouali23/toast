@@ -1,49 +1,42 @@
-<h2>{{step.title}}</h2>
-<p>{{step.label}}</p>
-
-<form method="POST" id="form-autocomplete" action="/api/responses/{{survey.id}}/{{step.id}}">
-<input type="hidden" name="responseId" value="{{responseId}}">
-  <input
-    list="autocomplete-list"
-    id="autocomplete-input"
-    name="value"
-    placeholder="{{step.placeholder}}"
-    autocomplete="off"
-    required
-  />
-  <datalist id="autocomplete-list">
-    {{#options}}
-      <option 
-        value="{{display}}" 
-        data-input="{{inputDisplay}}"
-        data-json='{{jsonData}}'>
-      </option>
-    {{/options}}
-  </datalist>
-
-  <button type="submit">Suivant</button>
-  
-</form>
+<input
+  list="autocomplete-list-{{id}}"     
+  id="autocomplete-input-{{id}}"    
+  name="{{id}}"                         
+  placeholder="{{placeholder}}"
+  autocomplete="off"
+  required
+/>
+<datalist id="autocomplete-list-{{id}}">
+  {{#options}}
+    <option 
+      value="{{display}}" 
+      data-input="{{inputDisplay}}"
+      data-json='{{jsonData}}'>
+    </option>
+  {{/options}}
+</datalist>
 
 <script>
-  const input = document.getElementById('autocomplete-input');
-  const form = document.getElementById('form-autocomplete');
+  (function() {
+    const input = document.getElementById('autocomplete-input-{{id}}');
+    const form = document.getElementById('surveyForm'); // ton formulaire principal
 
-  // Afficher displayInInput après sélection
-  input.addEventListener('input', (e) => {
-    const option = Array.from(document.querySelectorAll('#autocomplete-list option'))
-      .find(opt => opt.value === input.value);
-    if (option) {
-      input.value = option.dataset.input;
-    }
-  });
+    // Afficher inputDisplay après sélection
+    input.addEventListener('input', (e) => {
+      const option = Array.from(document.querySelectorAll('#autocomplete-list-{{id}} option'))
+        .find(opt => opt.value === input.value);
+      if (option) {
+        input.value = option.dataset.input;
+      }
+    });
 
-  // Avant de soumettre, envoyer JSON avec saveInDB
-  form.addEventListener('submit', (e) => {
-    const selectedOption = Array.from(document.querySelectorAll('#autocomplete-list option'))
-      .find(opt => opt.value === input.dataset.input || opt.dataset.input === input.value);
-    if (selectedOption) {
-      input.value = selectedOption.dataset.json; // JSON string à envoyer
-    }
-  });
+    // Avant soumission, envoyer JSON avec saveInDB
+    form.addEventListener('submit', (e) => {
+      const option = Array.from(document.querySelectorAll('#autocomplete-list-{{id}} option'))
+        .find(opt => opt.value === input.value || opt.dataset.input === input.value);
+      if (option) {
+        input.value = option.dataset.json; // envoyer JSON string côté serveur
+      }
+    });
+  })();
 </script>
