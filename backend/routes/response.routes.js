@@ -15,7 +15,8 @@ router.post('/:surveyId/run', async (req, res) => {
 
   if (!req.session.answers) req.session.answers = {};
   if (!req.session.pageNumber) req.session.pageNumber = 1;
-
+  if (!req.session.rotationQueueDone) req.session.rotationQueueDone = {};
+  
   let pageNumber = req.session.pageNumber;
 
   /* ======================================================
@@ -86,32 +87,41 @@ router.post('/:surveyId/run', async (req, res) => {
   /* ======================================================
      5️⃣ Initialiser la rotation (UNE SEULE FOIS)
      ====================================================== */
-  if (!req.session.rotationQueue && req.session.answers['q3']) {
-    req.session.rotationQueue = SurveyService.generateRotationQueue(
-      survey,
-      'q3',
-      req.session.answers
-    );
-
-    console.log('🔁 Rotation générée:', req.session.rotationQueue.map(s => ({
-      id: s.id,
-      parent: s.parent,
-      optionCode: s.optionCode,
-      optionLabel: s.optionLabel
-    })));  }
-
+  // if (!req.session.rotationQueue && req.session.answers['q3']) {
+  //   req.session.rotationQueue = SurveyService.generateRotationQueue(
+  //     survey,
+  //     'q3',
+  //     req.session.answers
+  //   );
+  //   req.session.rotationQueueDone = true;
+  //   console.log('🔁 Rotation générée:', req.session.rotationQueue.map(s => ({
+  //     id: s.id,
+  //     parent: s.parent,
+  //     optionCode: s.optionCode,
+  //     optionLabel: s.optionLabel
+  //   })));  }
+  if (!req.session.rotationQueue) {
+    // Pour chaque step qui peut avoir une rotation
+    for (const step of survey.steps) {
+      if (step.repeatFor && req.session.answers[step.repeatFor] && !req.session.rotationQueueDone[step.repeatFor]) {
+        req.session.rotationQueue = SurveyService.generateRotationQueue(
+          survey,
+          step.repeatFor,
+          req.session.answers
+        );
+        req.session.rotationQueueDone[step.repeatFor] = true; // rotation générée
+        console.log('🔁 Rotation générée pour', step.repeatFor, req.session.rotationQueue.map(s => s.id));
+        break; // ne générer qu’une rotation à la fois
+      }
+    }
+  }
   /* ======================================================
      6️⃣ Fin de rotation → pagination normale
      ====================================================== */
-  if (req.session.rotationQueue && req.session.rotationQueue.length === 0) {
-    delete req.session.rotationQueue;
-
-    const pages = [...new Set(survey.steps.map(s => s.page))].sort((a, b) => a - b);
-    const index = pages.indexOf(pageNumber);
-
-    pageNumber = pages[index + 1];
-    req.session.pageNumber = pageNumber;
-  }
+     if (req.session.rotationQueue && req.session.rotationQueue.length === 0) {
+      delete req.session.rotationQueue;
+    }
+    
 
   /* ======================================================
      7️⃣ Pagination normale (hors rotation)

@@ -205,26 +205,8 @@
         "input_cond": "",
         "output_cond": "value !== null",
         "required": true,
-        "isSubQuestion": false,
-        "navigation": {
-          "rules": [
-            {
-              "if": {
-                "operator": "IN",
-                "field": "commune",
-                "values": [
-                  "Kouba",
-                  "Alger Centre"
-                ]
-              },
-              "then": {
-                "goTo": "q14"
-              }
-            }
-          ],
-          "default": "redirection"
-        }
-        
+        "isSubQuestion": false
+       
       },
       {
         "id_db": "5Z10ZZ",
@@ -255,24 +237,8 @@
         "placeholder": "Sélectionnez une option",
         "required": true,
         "redirection": "FIN",
-        "isSubQuestion": false,
-        "navigation": {
-          "rules": [
-            {
-              "if": {
-                "operator": "IN",
-                "values": [
-                  "Sud",
-                  "Ouest"
-                ]
-              },
-              "then": {
-                "goTo": "q3"
-              }
-            }
-          ],
-          "default": "redirection"
-        }
+        "isSubQuestion": false
+        
         
       },
 
