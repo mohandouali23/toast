@@ -52,19 +52,9 @@ console.log("sessiondestroy")
 });
 
 
-// ------------------ Utilitaire : récupérer steps par page ------------------
 
-function prepareStepForPage(step) {
-  // Flags pour Mustache
-  step.type_text = step.type === 'text';
-  step.type_single_choice = step.type === 'single_choice';
-  step.type_multiple_choice = step.type === 'multiple_choice';
-  step.type_spinner = step.type === 'spinner';
-  step.type_autocomplete = step.type === 'autocomplete';
-  step.type_grid = step.type === 'grid';
-  step.type_accordion = step.type === 'accordion';
-  return step;
-}
+
+
 // ------------------ Route pages dynamiques ------------------
 router.get('/:surveyId/run', async (req, res) => {
   const { surveyId } = req.params;
@@ -82,7 +72,7 @@ router.get('/:surveyId/run', async (req, res) => {
    // Rotation
    if (req.session.rotationQueue && req.session.rotationQueue.length) {
     stepsOnPage = [req.session.rotationQueue[0].step];
-    console.log("req.session.rotationQueue",req.session.rotationQueue)
+   // console.log("req.session.rotationQueue",req.session.rotationQueue)
     //console.log('stepOnpage rotation',stepsOnPage)
   }else{
     stepsOnPage = survey.steps.filter(step => step.page === pageNumber);
@@ -103,7 +93,7 @@ router.get('/:surveyId/run', async (req, res) => {
         )
       }));
     }
-    return prepareStepForPage(step);
+    return SurveyService.prepareStepForPage(step);
   });
 
   // preparedSteps.forEach(step => async{

@@ -2,6 +2,7 @@
 import express from 'express';
 import ResponseNormalizer from '../services/ResponseNormalizer.js';
 import SurveyService from '../services/SurveyService.js';
+import RotationQueueUtils from '../services/RotationQueueUtils.js';
 import ResponseService from '../services/ResponseService.js';
 
 const router = express.Router();
@@ -20,7 +21,7 @@ router.post('/:surveyId/run', async (req, res) => {
   let pageNumber = req.session.pageNumber;
 
   /* ======================================================
-     1️⃣ Créer le document réponse (UNE SEULE FOIS)
+     1 Créer le document réponse (UNE SEULE FOIS)
      ====================================================== */
   if (!req.session.responseId) {
     const response = await ResponseService.createSurveyDocument(
@@ -35,7 +36,7 @@ router.post('/:surveyId/run', async (req, res) => {
   const responseId = req.session.responseId;
 
   /* ======================================================
-     2️⃣ Déterminer le STEP COURANT
+     2 Déterminer le STEP COURANT
      ====================================================== */
      let stepsOnPage = [];
 
@@ -48,13 +49,16 @@ router.post('/:surveyId/run', async (req, res) => {
      }
 
   /* ======================================================
-     3️⃣ Sauvegarder la réponse si elle existe
+     3 Sauvegarder la réponse si elle existe
      ====================================================== */
      for (const stepWrapper of stepsOnPage)  {
       const stepToNormalize = stepWrapper.step || stepWrapper;
     let rawValue = req.body[stepToNormalize.id];
 
-    if (stepToNormalize.type === 'accordion' || stepToNormalize.type === 'grid') {
+    if (stepToNormalize.type === 'accordion' 
+      || stepToNormalize.type === 'grid'
+      || stepToNormalize.type === 'single_choice'
+      || stepToNormalize.type === 'multiple_choice') {
       rawValue = req.body;
     }
 
@@ -63,23 +67,24 @@ router.post('/:surveyId/run', async (req, res) => {
       //   optionCode: stepToNormalize.optionCode,
       //   optionLabel: stepToNormalize.optionLabel
       // };
-   
+   console.log("rawvalue",rawValue)
       const normalized = ResponseNormalizer.normalize(stepToNormalize, rawValue,stepWrapper.optionIndex);
       await ResponseService.addAnswer(responseId, normalized);
 
       // Mémoriser réponse principale (pour rotation)
       if (!stepToNormalize.isSubQuestion) {
-        const key = stepWrapper.optionIndex
-        ? `${stepToNormalize.id}_${stepWrapper.optionIndex}`
-        : stepToNormalize.id;
-        req.session.answers[stepToNormalize.id] = rawValue;
+         // On stocke seulement la valeur principale pour la rotation
+  const mainValue = (stepToNormalize.type === 'multiple_choice')
+  ? req.body[stepToNormalize.id] // array des codes sélectionnés
+  : rawValue;
+        req.session.answers[stepToNormalize.id] = mainValue;
       }
 
-      console.log(`✅ Réponse sauvegardée: ${stepToNormalize.id}_${stepWrapper.optionIndex || ''}`);
+      console.log(` Réponse sauvegardée: ${stepToNormalize.id}_${stepWrapper.optionIndex || ''}`);
     }
   }
 /* ===============================================
-         4️⃣ Consommer UNE question de rotation
+         4 Consommer UNE question de rotation
          =============================================== */
          if (req.session.rotationQueue && req.session.rotationQueue.length > 0) {
           req.session.rotationQueue.shift();
@@ -87,30 +92,17 @@ router.post('/:surveyId/run', async (req, res) => {
   /* ======================================================
      5️⃣ Initialiser la rotation (UNE SEULE FOIS)
      ====================================================== */
-  // if (!req.session.rotationQueue && req.session.answers['q3']) {
-  //   req.session.rotationQueue = SurveyService.generateRotationQueue(
-  //     survey,
-  //     'q3',
-  //     req.session.answers
-  //   );
-  //   req.session.rotationQueueDone = true;
-  //   console.log('🔁 Rotation générée:', req.session.rotationQueue.map(s => ({
-  //     id: s.id,
-  //     parent: s.parent,
-  //     optionCode: s.optionCode,
-  //     optionLabel: s.optionLabel
-  //   })));  }
   if (!req.session.rotationQueue) {
     // Pour chaque step qui peut avoir une rotation
     for (const step of survey.steps) {
       if (step.repeatFor && req.session.answers[step.repeatFor] && !req.session.rotationQueueDone[step.repeatFor]) {
-        req.session.rotationQueue = SurveyService.generateRotationQueue(
+        req.session.rotationQueue = RotationQueueUtils.generateRotationQueue(
           survey,
           step.repeatFor,
           req.session.answers
         );
         req.session.rotationQueueDone[step.repeatFor] = true; // rotation générée
-        console.log('🔁 Rotation générée pour', step.repeatFor, req.session.rotationQueue.map(s => s.id));
+        console.log(' Rotation générée pour', step.repeatFor, req.session.rotationQueue.map(s => s.id));
         break; // ne générer qu’une rotation à la fois
       }
     }

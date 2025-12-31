@@ -34,8 +34,18 @@ export default class SurveyService {
       return [];
     }
   }
-
-
+// ------------------ Utilitaire : récupérer steps par page ------------------
+static prepareStepForPage(step) {
+  // Flags pour Mustache
+  step.type_text = step.type === 'text';
+  step.type_single_choice = step.type === 'single_choice';
+  step.type_multiple_choice = step.type === 'multiple_choice';
+  step.type_spinner = step.type === 'spinner';
+  step.type_autocomplete = step.type === 'autocomplete';
+  step.type_grid = step.type === 'grid';
+  step.type_accordion = step.type === 'accordion';
+  return step;
+}
 
   static prepareGridB(step, existingAnswer = null) {
     if (!Array.isArray(step.questions) || !Array.isArray(step.reponses)) return step;
@@ -122,52 +132,6 @@ export default class SurveyService {
     });
   
     return step;
-  }
-  
-  static generateRotationQueue(survey, mainQuestionId, answers) {
-    const mainStep = survey.steps.find(s => s.id === mainQuestionId);
-    if (!mainStep) return [];
-
-    const selectedOptions = answers[mainQuestionId];
-    if (!selectedOptions) return [];
-
-    // Si c'est multiple_choice, transformer en array
-    const selectedArray = Array.isArray(selectedOptions)
-      ? selectedOptions
-      : [selectedOptions];
-
-
-    const rotationQueue = [];
-
-    // Récupérer toutes les sous-questions qui dépendent de la question principale
-    const subSteps = survey.steps.filter(s => s.repeatFor === mainQuestionId);
-
-    // Pour chaque option sélectionnée dans la principale
-    selectedArray.forEach((optionCode, index) => {
-      const optionObj = mainStep.options.find(o => o.codeItem.toString() === optionCode.toString());
-
-      if (!optionObj) return;
-
-      subSteps.forEach(subStep => {
-         //  Cloner la step pour ne pas écraser l’original
-      const stepClone = { ...subStep };
-
-      //  Remplacer TRANSPORT par le label réel
-      stepClone.label = stepClone.label.replace("TRANSPORT", optionObj.label);
-
-        // Copier la step et ajouter contexte
-        rotationQueue.push({
-          id: subStep.id,
-          parent: mainQuestionId,
-          optionCode: optionObj.codeItem,
-          optionLabel: optionObj.label,
-          optionIndex: index + 1,  //  index pour suffixe
-          step: stepClone // conserve toute la structure originale si besoin
-        });
-      });
-    });
-
-    return rotationQueue;
   }
   
 }

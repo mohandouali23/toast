@@ -45,23 +45,60 @@ export default class ResponseNormalizer {
         }
         break;
 
-      case 'single_choice':
-        value = rawValue;
-        break;
+        case 'single_choice': {
+          const selectedValue = rawValue[step.id];
+          value = selectedValue;
+        
+          const result = {
+            [idDB]: value
+          };
+        
+          // récupérer l'option sélectionnée
+          const selectedOption = step.options?.find(
+            opt => opt.codeItem?.toString() === selectedValue?.toString()
+          );
+        
+          // gérer la précision si requise
+          if (selectedOption?.requiresPrecision) {
+            const precisionValue = rawValue[`precision_${selectedValue}`];
+        
+            if (precisionValue && precisionValue.trim() !== '') {
+              result[`${step.id_db}_pr_${selectedValue}`] = precisionValue.trim();
+            }
+          }
+        
+          return result;
+          break;
+        }
+        
+       
 
         case 'multiple_choice': {
           if (!rawValue) {
-            value = null;
-            break;
+            return { [step.id_db]: null };
           }
-          // rawValue peut être un array ou une string
-          if (Array.isArray(rawValue)) {
-            value = rawValue.join('/'); // concatène les valeurs avec /
-          } else {
-            value = rawValue.toString();
-          }
+        
+          // selectedArray contient les codes sélectionnés
+          const selectedArray = Array.isArray(rawValue[step.id]) ? rawValue[step.id] : [rawValue[step.id]];
+          const mainValue = selectedArray.join('/');
+        
+          // Objet final à retourner
+          const result = { [step.id_db]: mainValue };
+        
+          // Ajouter les champs de précision pour chaque code sélectionné
+          selectedArray.forEach(codeItem => {
+            const precisionKey = `precision_${step.id}_${codeItem}`;
+            const precisionValue = rawValue[precisionKey];
+            if (precisionValue && precisionValue.trim() !== '') {
+              result[`${step.id_db}_pr_${codeItem}`] = precisionValue;
+            }
+          });
+        
+          return result;
+        
           break;
         }
+        
         
         case 'grid': {
           const isCellEnabled = (question, responseId) => {
