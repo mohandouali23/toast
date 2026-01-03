@@ -5,13 +5,15 @@
   placeholder="{{placeholder}}"
   autocomplete="off"
   required
+  class="autocomplete-input"
 />
-<datalist id="autocomplete-list-{{id}}">
+<datalist id="autocomplete-list-{{id}}" class="autocomplete-list">
   {{#options}}
     <option 
       value="{{display}}" 
       data-input="{{inputDisplay}}"
-      data-json='{{jsonData}}'>
+      data-json='{{jsonData}}'
+      class="autocomplete-option">
     </option>
   {{/options}}
 </datalist>

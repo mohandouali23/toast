@@ -19,11 +19,12 @@ body {
 .survey {
   background: #fff;
   width: 100%;
-  max-width: 520px;
+  max-width: 720px;
   padding: 32px;
   border-radius: 14px;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
   animation: fadeIn 0.4s ease-in-out;
+ 
 }
 
 /* TITRES */
@@ -41,6 +42,7 @@ body {
 
 /* FORM */
 form {
+  
   display: flex;
   flex-direction: column;
   gap: 16px;

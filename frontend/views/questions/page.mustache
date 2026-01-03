@@ -1,10 +1,8 @@
-<h1>{{survey.title}}</h1>
-
 <form id="surveyForm" method="POST" action="/api/responses/{{survey.id}}/run">
   {{#steps}}
     <div class="question-block" style="margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
-      {{#title}}<h4>{{title}}</h4>{{/title}}
-      {{#label}}<h4>{{label}}</h4>{{/label}}
+      {{#title}}<h4>{{title}} {{label}}</h4>{{/title}}
+      
       {{#description}}<p>{{description}}</p>{{/description}}
       
       {{#type_text}}{{> questions/text}}{{/type_text}}

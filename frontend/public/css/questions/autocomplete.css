@@ -1,7 +1,44 @@
-.question-autocomplete input {
-  background: #f9fafb;
+/* Input principal */
+.autocomplete-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  background-color: #fff;
 }
 
-.question-autocomplete datalist {
-  display: none;
+/* Focus sur l'input */
+.autocomplete-input:focus {
+  border-color: #4f46e5; /* violet moderne */
+  box-shadow: 0 0 8px rgba(79, 70, 229, 0.3);
+  outline: none;
+}
+
+/* Placeholder */
+.autocomplete-input::placeholder {
+  color: #a1a1aa;
+  font-style: italic;
+}
+
+/* Datalist options (limité selon navigateur) */
+.autocomplete-list .autocomplete-option {
+  padding: 8px 10px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+/* Hover visible dans navigateurs supportés */
+.autocomplete-list .autocomplete-option:hover {
+  background-color: #f0f4ff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .autocomplete-input {
+    font-size: 0.95rem;
+    padding: 8px 10px;
+  }
 }

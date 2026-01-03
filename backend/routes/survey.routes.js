@@ -56,27 +56,50 @@ router.get('/:surveyId/run', async (req, res) => {
   const { surveyId } = req.params;
   const survey = SurveyService.loadSurvey(surveyId);
 
-
-  if (!req.session.pageNumber) req.session.pageNumber = 1;
   if (!req.session.answers) req.session.answers = {};
 
-  const pageNumber = req.session.pageNumber;
-
-  let stepsOnPage = survey.steps.filter(step => step.page === pageNumber);
+  // if (!req.session.pageNumber) req.session.pageNumber = 1;
+  // const pageNumber = req.session.pageNumber;
+  // let stepsOnPage = survey.steps.filter(step => step.page === pageNumber);
  
+  // Utiliser currentStepId pour savoir quelle question afficher
+  if (!req.session.currentStepId) {
+    const firstStep = survey.steps
+      .filter(s => s.page !== undefined)
+      .sort((a, b) => a.page - b.page)[0];
+    req.session.currentStepId = firstStep.id;
+  }
+
+  const currentStep = survey.steps.find(
+    step => step.id === req.session.currentStepId
+  );
+
+  if (!currentStep) {
+    return res.redirect(`/survey/${surveyId}/end`);
+  }
+
+  const currentPage = currentStep.page;
+
+  // Afficher toutes les questions de la même page que currentStep
+  let stepsOnPage = survey.steps.filter(step => step.page === currentPage);
+
+
    // Rotation
    if (req.session.rotationQueue && req.session.rotationQueue.length) {
     stepsOnPage = [req.session.rotationQueue[0].step];
-  }else{
-    stepsOnPage = survey.steps.filter(step => step.page === pageNumber);
+    console.log("step")
   }
+  // else{
+  //   stepsOnPage = survey.steps.filter(step => step.page === pageNumber);
+  // }
+
   // DEBUG: Afficher ce qui est dans la session
-  console.log('🔍 Session answers avant pré-remplissage:', {
-    page: pageNumber,
-    answers: req.session.answers,
-    q3: req.session.answers['q3'],
-    typeOfQ3: typeof req.session.answers['q3']
-  });
+  // console.log('🔍 Session answers avant pré-remplissage:', {
+  //   page: pageNumber,
+  //   answers: req.session.answers,
+  //   q3: req.session.answers['q3'],
+  //   typeOfQ3: typeof req.session.answers['q3']
+  // });
 
   let options = [];
   const preparedSteps = stepsOnPage.map(step => {
@@ -158,7 +181,25 @@ router.get('/:surveyId/run', async (req, res) => {
     survey,
     steps: preparedSteps,
     options
-  });
+  },
+    (err, html) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Erreur rendu page');
+      }
+     // 2 Injecter dans layout.mustache
+      res.render('layout', {
+        survey,
+        step: {
+        //  id: `page-${pageNumber}`
+         id: `page-${currentPage}`,
+          type: 'page',
+          title: survey.title
+        },
+        content: html
+      });
+    }
+  );
 });
 
 export default router;

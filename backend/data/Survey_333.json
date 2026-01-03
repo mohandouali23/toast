@@ -14,81 +14,14 @@
         "label": "Quel est votre moyen de transport principal ttt ?",
         "placeholder": "Ex : Bus, Train, Voiture...",
         "help_text": "Indiquez le moyen que vous utilisez le plus souvent",
-        "redirection": "q2",
+        "redirection": "q3",
         "input_cond": "",
         "output_cond": "value.length > 0",
         "required": true,
         "isSubQuestion": false,
         "page": 1
         
-      },
-    
-      {
-        "id_db": "UPI98Q",
-       "id": "q2",
-       "title": "Q72.",
-       "type": "single_choice",
-       "label": "Fréquence d’utilisation du transport en commun",
-       "page": 2,
-       "input_cond": "",
-       "output_cond": "value.length > 0",
-       "options": [
-         {
-           "codeItem": 1,
-           "label": "Tous les jours44"
-         },
-         {
-           "codeItem": 2,
-           "label": "Quelques fois par semaine mm"
-         },
-         {
-           "codeItem": 7,
-           "label": "Autre 88",
-           "requiresPrecision": true
-         }
-       ],
-       "placeholder": "",
-       "help_text": "Sélectionnez la fréquence la plus proche de votre utilisation",
-       "redirection": "q3",
-       "required": true,
-       "isSubQuestion": false
-     },
-      {
-         "id_db": "UPI3DQ",
-        "id": "q2",
-        "title": "Q2.",
-        "type": "single_choice",
-        "label": "Fréquence d’utilisation du transport en commun",
-        "page": 99,
-        "input_cond": "",
-        "output_cond": "value.length > 0",
-        "options": [
-          {
-            "codeItem": 1,
-            "label": "Tous les jours"
-          },
-          {
-            "codeItem": 2,
-            "label": "Quelques fois par semaine"
-          },
-          {
-            "codeItem": 5,
-            "label": "Autre",
-            "requiresPrecision": true
-          }
-        ],
-        "placeholder": "",
-        "help_text": "Sélectionnez la fréquence la plus proche de votre utilisation",
-        "redirection": "q3",
-        "required": true,
-        "isSubQuestion": false
-      },
-      {
-        "page": 3,
-        "description": "Cette page contient des informations importantes avant les questions suivantes"
-        
-      },
-      {
+      },{
         "id_db": "ER8136",
         "id": "q3",
         "title": "Q3.",
@@ -126,7 +59,7 @@
         "required": true,
         "rotationTemplate": ["q3_1", "q3_2", "q3_3"],
         "output_cond": "value.length > 0",
-        "redirection": "q4",
+        "redirection": "q2",
         "isSubQuestion": false,
         "navigation": {
           "rules": [
@@ -151,7 +84,7 @@
        "title": "Q3.1",
        "type": "single_choice",
        "label": "À quelle fréquence utilisez-vous le TRANSPORT ?",
-       "page": 0,
+       "page": 99,
        "repeatFor": "q3",
        "input_cond": "",
        "output_cond": "value.length > 0",
@@ -162,7 +95,7 @@
   ],
        "placeholder": "",
        "help_text": "Sélectionnez la fréquence la plus proche de votre utilisation",
-       "redirection": "",
+       "redirection": "q3_2",
        "required": true,
        "isSubQuestion": false
      },
@@ -176,12 +109,12 @@
   "label": "Précisez les lignes ou destinations que vous utilisez en TRANSPORT :",
         "placeholder": "Ex : b12 b15...",
         "help_text": "",
-        "redirection": "",
+        "redirection": "q3_3",
         "input_cond": "",
         "output_cond": "value.length > 0",
         "required": true,
         "isSubQuestion": false,
-        "page": 0
+        "page": 99
         
       },
 
@@ -192,7 +125,7 @@
   "repeatFor": "q3",
   "type": "single_choice",
   "label": "Pour quels motifs utilisez-vous la TRANSPORT ?",
-        "page": 0,
+        "page": 99,
         "input_cond": "",
         "output_cond": "value.length > 0",
        "options": [
@@ -202,10 +135,92 @@
   ],
         "placeholder": "",
         "help_text": "Sélectionnez la fréquence la plus proche de votre utilisation",
-        "redirection": "",
+      
         "required": true,
         "isSubQuestion": false
       },
+    
+      {
+        "id_db": "UPI98Q",
+       "id": "q24",
+       "title": "Q72.",
+       "type": "single_choice",
+       "label": "Fréquence d’utilisation du transport en commun",
+       "page": 2,
+       "input_cond": "",
+       "output_cond": "value.length > 0",
+       "options": [
+         {
+           "codeItem": 1,
+           "label": "Tous les jours44"
+         },
+         {
+           "codeItem": 2,
+           "label": "Quelques fois par semaine mm"
+         },
+         {
+           "codeItem": 7,
+           "label": "Autre 88",
+           "requiresPrecision": true
+         }
+       ],
+       "placeholder": "",
+       "help_text": "Sélectionnez la fréquence la plus proche de votre utilisation",
+       "redirection": "q3",
+       "required": true,
+       "isSubQuestion": false
+     },
+      {
+         "id_db": "UPI3DQ",
+        "id": "q2",
+        "title": "Q2.",
+        "type": "single_choice",
+        "label": "Fréquence d’utilisation du transport en commun",
+        "page": 17,
+        "input_cond": "",
+        "output_cond": "value.length > 0",
+        "options": [
+          {
+            "codeItem": 1,
+            "label": "Tous les jours"
+          },
+          {
+            "codeItem": 2,
+            "label": "Quelques fois par semaine"
+          },
+          {
+            "codeItem": 5,
+            "label": "Autre",
+            "requiresPrecision": true
+          }
+        ],
+        "placeholder": "",
+        "help_text": "Sélectionnez la fréquence la plus proche de votre utilisation",
+        "redirection": "q4",
+        "required": true,
+        "isSubQuestion": false,
+        "navigation": {
+        "rules": [
+          {
+            "if": {
+              "operator": "EQUALS",
+              "field": "codeItem",
+              "value": 1
+            },
+            "then": {
+              "goTo": "q6"
+            }
+          }
+        ],
+        "default": "redirection"
+      }
+      },
+      {
+        "page": 3,
+        "description": "Cette page contient des informations importantes avant les questions suivantes"
+        
+      },
+      
       {
         "id_db": "YP3O0G",
         "id": "q4",
@@ -249,7 +264,7 @@
         "title": "Q5.",
         "type": "spinner",
         "label": "Choisissez votre région",
-        "page": 6,
+        "page": 16,
         "options": [
           {
             "codeItem": 1,
@@ -271,7 +286,7 @@
         ],
         "placeholder": "Sélectionnez une option",
         "required": true,
-        "redirection": "FIN",
+        "redirection": "q16",
         "isSubQuestion": false
         
         
@@ -330,13 +345,105 @@
         ]
       },
       {
+  "id_db": "SAT01",
+  "id": "q17",
+  "type": "accordion",
+  "title": "Q17.",
+  "label": "Satisfaction concernant vos moyens de transport",
+  "page": 8,
+  "redirection": "q13",
+  "required": true,
+  "sections": [
+    {
+      "id_db_sect": "SAT_SECT1",
+      "id_sect": "q17_sect1",
+      "title": "Bus",
+      "questions": [
+        {
+          "id_db": "SAT_Q1",
+          "id": "q17_1",
+          "type": "single_choice",
+          "label": "Quelle est votre satisfaction pour le bus ?",
+          "required": true,
+          "options": [
+            { "codeItem": 1, "label": "😡 Mauvais" },
+            { "codeItem": 2, "label": "😕 Moyen" },
+            { "codeItem": 3, "label": "🙂 Bien" },
+            { "codeItem": 4, "label": "😃 Très bien" }
+          ]
+        }
+      ]
+    },
+    {
+      "id_db_sect": "SAT_SECT2",
+      "id_sect": "q17_sect2",
+      "title": "Métro",
+      "questions": [
+        {
+          "id_db": "SAT_Q2",
+          "id": "q17_2",
+          "type": "single_choice",
+          "label": "Quelle est votre satisfaction pour le métro ?",
+          "required": true,
+          "options": [
+            { "codeItem": 1, "label": "😡 Mauvais" },
+            { "codeItem": 2, "label": "😕 Moyen" },
+            { "codeItem": 3, "label": "🙂 Bien" },
+            { "codeItem": 4, "label": "😃 Très bien" }
+          ]
+        }
+      ]
+    },
+    {
+      "id_db_sect": "SAT_SECT3",
+      "id_sect": "q17_sect3",
+      "title": "Tram",
+      "questions": [
+        {
+          "id_db": "SAT_Q3",
+          "id": "q17_3",
+          "type": "single_choice",
+          "label": "Quelle est votre satisfaction pour le tram ?",
+          "required": true,
+          "options": [
+            { "codeItem": 1, "label": "😡 Mauvais" },
+            { "codeItem": 2, "label": "😕 Moyen" },
+            { "codeItem": 3, "label": "🙂 Bien" },
+            { "codeItem": 4, "label": "😃 Très bien" }
+          ]
+        }
+      ]
+    },
+    {
+      "id_db_sect": "SAT_SECT4",
+      "id_sect": "q17_sect4",
+      "title": "Voiture",
+      "questions": [
+        {
+          "id_db": "SAT_Q4",
+          "id": "q17_4",
+          "type": "single_choice",
+          "label": "Quelle est votre satisfaction pour la voiture ?",
+          "required": true,
+          "options": [
+            { "codeItem": 1, "label": "😡 Mauvais" },
+            { "codeItem": 2, "label": "😕 Moyen" },
+            { "codeItem": 3, "label": "🙂 Bien" },
+            { "codeItem": 4, "label": "😃 Très bien" }
+          ]
+        }
+      ]
+    }
+  ]
+},
+      {
         "id_db": "Y1UEG9",
         "id": "q14",
         "type": "grid",
         "title": "Q14.",
         "label": "Activités pratiquées et motivation principale du séjour",
         "required": true,
-        "redirection": "q13",
+        "redirection": "q17",
         "page": 8,
         "questions": [
           { "id_db_qst": "Y1UEG9_q14_1",
@@ -460,7 +567,7 @@
         "page": 10,
         "label": "Activités pratiquées et motivation principale du séjour",
         "required": true,
-        "redirection": "q2",
+        "redirection": "FIN",
         "questions": [
           { "id_db_qst": "Y1U3FY_q15_1", "id": "q15_1", "label": "Se promener, flâner" },
           { "id_db_qst": "Y1U3FY_q15_2","id": "q15_2", "label": "Visites de musées, monuments" },
@@ -500,13 +607,14 @@
         "id": "q6",
         "title": "Q6bis.",
         "type": "text",
-        "page": 99,
+        "page": 111,
         "label": "Quel est votre moyen de transport principal  bus?",
         "placeholder": "uu",
         "help_text": "Indiquez le moyen que vous utilisez le plus souvent",
         "input_cond": "",
         "output_cond": "value.length > 0",
         "required": true,
+        "redirection": "q4",
         "isSubQuestion": true,
         "id_db": "8KTVIW"
       },
@@ -515,7 +623,7 @@
         "title": "Q8bis.",
         "type": "multiple_choice",
         "label": "Quels transports utilisez-vous ?",
-        "page": 99,
+        "page": 111,
         "options": [
           {
             "codeItem": 1,

@@ -1,48 +1,48 @@
 export default class NavigationRuleService {
 
   static evaluateRule(rule, answerValue) {
+    console.log("answervalue",answerValue)
     //const value = answerValue;
    // const value = this.extractValue(answerValue, rule.field);
 
     const extracted = this.extractValue(answerValue, rule.field);
-
+ console.log("extracted value",extracted)
   // Toujours travailler avec un tableau
   const values = Array.isArray(extracted) ? extracted : [extracted];
-
+ console.log("value",values)
     switch (rule.operator) {
       case 'EQUALS':
-      return values.some(v => v === rule.value);
+        return values.some(v => String(v) === String(rule.value));
 
-        case 'NOT_EQUALS':
-          return values.every(v => v !== rule.value);
+      case 'NOT_EQUALS':
+        return values.every(v => String(v) !== String(rule.value));
 
-        case 'IN':
-          return values.some(v => rule.values.includes(v));
+      case 'IN':
+        return values.some(v => rule.values.includes(v));
 
-        case 'NOT_IN':
-           return values.every(v => !rule.values.includes(v));
+      case 'NOT_IN':
+        return values.every(v => !rule.values.includes(v));
 
       case 'LT':
-        return Number(values) < rule.value;
+        return values.some(v => Number(v) < rule.value);
 
       case 'LTE':
-        return Number(values) <= rule.value;
+        return values.some(v => Number(v) <= rule.value);
 
       case 'GT':
-        return Number(values) > rule.value;
+        return values.some(v => Number(v) > rule.value);
 
       case 'GTE':
-        return Number(values) >= rule.value;
+        return values.some(v => Number(v) >= rule.value);
 
       case 'BETWEEN':
-        return Number(values) >= rule.values[0] &&
-               Number(values) <= rule.values[1];
+        return values.some(v => Number(v) >= rule.values[0] && Number(v) <= rule.values[1]);
 
       case 'FILLED':
-        return values.length > 0;
-          
+        return values.some(v => v !== null && v !== undefined && v !== '');
+
       case 'EMPTY':
-        return values.length === 0;
+        return values.every(v => v === null || v === undefined || v === '');
 
       default:
         return false;
@@ -83,25 +83,30 @@ export default class NavigationRuleService {
     const index = steps.findIndex(s => s.id === step.id);
     return steps[index + 1]?.id || 'FIN';
   }
-
-  static extractValue(answerValue, field) {
+static extractValue(answerValue, field) {
     if (answerValue == null) return null;
-  
-    //  multiple_choice → tableau d'objets
-    if (Array.isArray(answerValue) && field) {
-      return answerValue
-        .map(v => v?.[field])
-        .filter(v => v !== undefined);
+
+    // Cas multiple_choice → tableau d'objets
+    if (Array.isArray(answerValue)) {
+      if (field) {
+        return answerValue.map(v => v?.[field]).filter(v => v !== undefined);
+      }
+      return answerValue;
     }
-  
-    //  objet simple (autocomplete, single_choice avec objet)
-    if (typeof answerValue === 'object' && field) {
-      return answerValue[field];
+
+    // Cas objet complexe (autocomplete, accordion, single_choice avec objet)
+    if (typeof answerValue === 'object') {
+      // Si field fourni, retourner la clé spécifique
+      if (field && field in answerValue) return answerValue[field];
+
+      // Sinon on cherche la "valeur principale" (codeItem, value, etc.)
+      if ('codeItem' in answerValue) return answerValue.codeItem;
+      if ('value' in answerValue) return answerValue.value;
+
+      return answerValue;
     }
-  
-    //  valeur simple
+
+    // Cas primitif (string, number)
     return answerValue;
   }
-  
-  
 }

@@ -1,14 +1,17 @@
-const stepType = document.querySelector('.survey')?.dataset.stepType;
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM chargé, JS fonctionne ✅');
 
-if (stepType) {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = `/assets/css/questions/${stepType}.css`;
-  document.head.appendChild(link);
-}
+  const stepType = document.querySelector('.survey')?.dataset.stepType;
+  console.log('stepType:', stepType);
 
-
-
+  if (stepType) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `/assets/css/questions/${stepType}.css`;
+    document.head.appendChild(link);
+    console.log('CSS dynamique injecté ✅', link.href);
+  }
+});
 
 
 
