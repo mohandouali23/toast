@@ -14,7 +14,7 @@
         "label": "Quel est votre moyen de transport principal ttt ?",
         "placeholder": "Ex : Bus, Train, Voiture...",
         "help_text": "Indiquez le moyen que vous utilisez le plus souvent",
-        "redirection": "q3",
+        "redirection": "q13",
         "input_cond": "",
         "output_cond": "value.length > 0",
         "required": true,
@@ -506,7 +506,7 @@
         "page": 9,
         "label": "Activités pratiquées et motivation principale du séjour",
         "required": true,
-        "redirection": "q15",
+        "redirection": "q3",
         "questions": [
           { "id_db_qst": "Y1UEGY_q13_1",
            "id": "q13_1", "label": "Se promener, flâner" },
