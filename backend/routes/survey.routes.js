@@ -34,7 +34,6 @@ router.get('/:surveyId/end', (req, res) => {
   req.session.destroy(err => {
     if (err) console.error('Erreur destruction session:', err);
   });
-//console.log("sessiondestroy")
   const step = { type: 'end', id: 'end', title: 'Fin du questionnaire' };
 
   res.render('end', { 
@@ -58,10 +57,6 @@ router.get('/:surveyId/run', async (req, res) => {
 
   if (!req.session.answers) req.session.answers = {};
 
-  // if (!req.session.pageNumber) req.session.pageNumber = 1;
-  // const pageNumber = req.session.pageNumber;
-  // let stepsOnPage = survey.steps.filter(step => step.page === pageNumber);
- 
   // Utiliser currentStepId pour savoir quelle question afficher
   if (!req.session.currentStepId) {
     const firstStep = survey.steps
@@ -77,30 +72,18 @@ router.get('/:surveyId/run', async (req, res) => {
   if (!currentStep) {
     return res.redirect(`/survey/${surveyId}/end`);
   }
-
   const currentPage = currentStep.page;
-
   // Afficher toutes les questions de la même page que currentStep
   let stepsOnPage = survey.steps.filter(step => step.page === currentPage);
 
-
    // Rotation
-   if (req.session.rotationQueue && req.session.rotationQueue.length) {
+   if (Array.isArray(req.session.rotationQueue) && req.session.rotationQueue.length > 0) {
     stepsOnPage = [req.session.rotationQueue[0].step];
-    console.log("step")
+  } else {
+    // pas de rotation en cours → page normale
+    stepsOnPage = survey.steps.filter(step => step.page === currentPage);
   }
-  // else{
-  //   stepsOnPage = survey.steps.filter(step => step.page === pageNumber);
-  // }
-
-  // DEBUG: Afficher ce qui est dans la session
-  // console.log('🔍 Session answers avant pré-remplissage:', {
-  //   page: pageNumber,
-  //   answers: req.session.answers,
-  //   q3: req.session.answers['q3'],
-  //   typeOfQ3: typeof req.session.answers['q3']
-  // });
-
+  
   let options = [];
   const preparedSteps = stepsOnPage.map(step => {
     if (step.type === 'grid') step = SurveyService.prepareGridB(step);
@@ -117,9 +100,13 @@ router.get('/:surveyId/run', async (req, res) => {
     }
  // --- Pré-remplir selon le type ---
  switch(step.type) {
-  
-  case 'text':
   case 'spinner':
+   //console.log(" text spinner step & req session answer",   req.session.answers );
+
+    step.value = AnswerPrefillUtils.spinner(step, req.session.answers);
+    break;
+  case 'text':
+ 
    //console.log(" text spinner step & req session answer",   req.session.answers );
 
     step.value = AnswerPrefillUtils.text(step, req.session.answers);
@@ -130,43 +117,27 @@ router.get('/:surveyId/run', async (req, res) => {
     AnswerPrefillUtils.singleChoice(step, req.session.answers);
     break;
   case 'multiple_choice':
-
-   // DEBUG spécifique
-  //  console.log(`🔧 Pré-remplissage multiple_choice pour ${step.id}:`, {
-  //   sessionValue: req.session.answers[step.id],
-  //   optionsAvant: step.options.map(o => o.codeItem)
-  // });
     AnswerPrefillUtils.multipleChoice(step, req.session.answers);
-     // DEBUG après
-    //  console.log(`✅ Après pré-remplissage ${step.id}:`, 
-    //   step.options.map(o => ({ code: o.codeItem, selected: o.isSelected }))
-    // );
     break;
-
   case 'autocomplete':
-    console.log("autocomplete step & req session answer", req.session.answers );
+    //console.log("autocomplete step & req session answer", req.session.answers );
 
     AnswerPrefillUtils.autocomplete(step, req.session.answers);
     break;
+    
   case 'accordion':
-    console.log("accordion step & req session answer", req.session.answers );
+   console.log("accordion step & req session answer", req.session.answers );
 
     AnswerPrefillUtils.accordion(step, req.session.answers);
     break;
   case 'grid':
-    console.log("grid step & req session answer",req.session.answers );
+    //console.log("grid step & req session answer",req.session.answers );
 
     AnswerPrefillUtils.grid(step, req.session.answers);
     break;
   default:
     break;
 }
-    //  // Pré-remplir avec les réponses déjà sauvegardées
-    //  const savedAnswer = req.session.answers[step.id];
-    //  if (savedAnswer) {
-    //    step.value = savedAnswer; // pour text, single_choice, multiple_choice
-    //  }
-
     return SurveyService.prepareStepForPage(step);
   });
 
@@ -187,11 +158,10 @@ router.get('/:surveyId/run', async (req, res) => {
         console.error(err);
         return res.status(500).send('Erreur rendu page');
       }
-     // 2 Injecter dans layout.mustache
+     //  Injecter dans layout.mustache
       res.render('layout', {
         survey,
         step: {
-        //  id: `page-${pageNumber}`
          id: `page-${currentPage}`,
           type: 'page',
           title: survey.title

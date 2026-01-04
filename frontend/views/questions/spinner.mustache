@@ -1,6 +1,6 @@
 <select name="{{id}}" required>
-  <option value="" disabled selected>{{placeholder}}</option>
+  <option value="" disabled {{^value}}selected{{/value}}>{{placeholder}}</option>
   {{#options}}
-    <option value="{{codeItem}}">{{label}}</option>
+    <option value="{{codeItem}}" {{#isSelected}}selected{{/isSelected}}>{{label}}</option>
   {{/options}}
 </select>

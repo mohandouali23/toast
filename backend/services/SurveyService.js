@@ -13,17 +13,24 @@ export default class SurveyService {
     return survey.steps.find(s => s.id === stepId);
   }
 
-  // static getNextStep(survey, step, answerValue) {
-  //   const next = NavigationRuleService.resolve(
-  //     step,
-  //     answerValue,
-  //     survey.steps
-  //   );
-
-  //   if (next === 'FIN') return null;
-  //   return next;
-  // }
-
+  static resolveNextStep({ survey, step, answers }) {
+    if (!step) return null;
+  
+    const answerValue = answers[step.id];
+  
+    const nextStepId = NavigationRuleService.resolve(
+      step,
+      answerValue,
+      survey.steps
+    );
+  
+    if (!nextStepId || nextStepId === 'FIN') {
+      return null;
+    }
+  
+    return nextStepId;
+  }
+  
   static loadTable(tableName) {
     try {
       const filePath = path.resolve(`backend/data/${tableName}.json`);
@@ -33,6 +40,7 @@ export default class SurveyService {
       console.error(`Impossible de charger la table ${tableName}`, e);
       return [];
     }
+
   }
 // ------------------ Utilitaire : récupérer steps par page ------------------
 static prepareStepForPage(step) {

@@ -39,6 +39,7 @@ export default class ResponseNormalizer {
       case 'text':
       case 'spinner':
         value = rawValue;
+        
         break;
 
       case 'autocomplete':
@@ -54,7 +55,7 @@ export default class ResponseNormalizer {
         case 'single_choice': {
          
           const selectedValue = rawValue[step.id];
-          console.log("selected value single",selectedValue)
+         //console.log("selected value single",selectedValue)
           value = selectedValue;
         
           const result = {
@@ -204,7 +205,7 @@ export default class ResponseNormalizer {
         }
         
         
-
+console.log("value normlize",value)
       default:
         value = rawValue;
         break;

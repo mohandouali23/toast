@@ -63,7 +63,11 @@ export default class RotationQueueUtils {
 
     return rotationQueue;
   }
-  
+  //  Fonction pour prev sur rotation
+  static getStepWrapperById(session, stepId) {
+    if (!session.rotationQueue) return null;
+    return session.rotationQueue.find(wrapper => wrapper.step.id === stepId) || null;
+  }
 
   }
   

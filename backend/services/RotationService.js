@@ -1,5 +1,7 @@
 // services/RotationService.js
 
+import RotationQueueUtils from "./RotationQueueUtils.js";
+
 export default class RotationService {
 
   static getCurrentStep(session, survey) {
@@ -41,7 +43,7 @@ export default class RotationService {
         answers[step.repeatFor] &&
         !session.rotationQueueDone[step.repeatFor]
       ) {
-        const queue = generateQueue(survey, step.repeatFor, answers);
+        const queue = RotationQueueUtils.generateRotationQueue(survey, step.repeatFor, answers);
 
         session.rotationQueueDone[step.repeatFor] = true;
 

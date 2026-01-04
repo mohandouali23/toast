@@ -2,13 +2,13 @@
   <label>{{label}}</label>
 
   {{#isText}}
-    <input type="text" name="{{id}}" placeholder="{{placeholder}}">
+    <input type="text" name="{{id}}" placeholder="{{placeholder}}" value="{{value}}">
   {{/isText}}
 
   {{#isSpinner}}
     <select name="{{id}}">
       {{#options}}
-        <option value="{{.}}">{{.}}</option>
+        <option value="{{.}}"{{#isSelected}}selected{{/isSelected}}>{{.}}</option>
       {{/options}}
     </select>
   {{/isSpinner}}
@@ -16,7 +16,8 @@
   {{#isSingleChoice}}
     {{#options}}
       <label>
-        <input type="radio" name="{{id}}" value="{{codeItem}}">
+        <input type="radio" name="{{id}}" value="{{codeItem}}"
+         {{#isSelected}}checked{{/isSelected}}>
         {{label}}
       </label><br>
     {{/options}}
@@ -25,7 +26,8 @@
   {{#isMultipleChoice}}
     {{#options}}
       <label>
-        <input type="checkbox" name="{{id}}" value="{{codeItem}}">
+        <input type="checkbox" name="{{id}}" value="{{codeItem}}"
+         {{#isSelected}}checked{{/isSelected}}>
         {{label}}
       </label>
     {{/options}}

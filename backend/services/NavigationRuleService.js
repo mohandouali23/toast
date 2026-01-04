@@ -1,15 +1,15 @@
 export default class NavigationRuleService {
 
   static evaluateRule(rule, answerValue) {
-    console.log("answervalue",answerValue)
+    //console.log("answervalue",answerValue)
     //const value = answerValue;
    // const value = this.extractValue(answerValue, rule.field);
 
     const extracted = this.extractValue(answerValue, rule.field);
- console.log("extracted value",extracted)
+// console.log("extracted value",extracted)
   // Toujours travailler avec un tableau
   const values = Array.isArray(extracted) ? extracted : [extracted];
- console.log("value",values)
+ //console.log("value",values)
     switch (rule.operator) {
       case 'EQUALS':
         return values.some(v => String(v) === String(rule.value));
