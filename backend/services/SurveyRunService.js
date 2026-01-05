@@ -34,7 +34,7 @@ export default class SurveyRunService {
         isInRotation
       });
   //  Vérifier la step avant navigation
-  console.log("isStepValid",currentStep," session.answers", session.answers,"currentStepWrapper",currentStepWrapper)
+  console.log(" session.answers", session.answers)
   const isStepValid = ValidationService.validateStep(currentStep, session.answers, currentStepWrapper);
   if (!isStepValid) {
     // Stop navigation si invalid
@@ -140,6 +140,12 @@ export default class SurveyRunService {
 
     // Normaliser et sauvegarder dans la base
     const normalized = ResponseNormalizer.normalize(step, rawValue, wrapper?.optionIndex);
+console.log('normlized',normalized)
+ // 🔹 hadi oui  Fusionner toutes les réponses normalisées (sous-questions incluses) dans session.answers
+//  Object.keys(normalized).forEach(key => {
+//   //session.answers[answerKey] = mainValue;
+//   session.answers[key] = normalized[key];
+// });
    //  Calcul des clés à supprimer
 let selectedOptions = [];
 if (step.type === 'multiple_choice') {
@@ -147,8 +153,9 @@ if (step.type === 'multiple_choice') {
 }
 const keysToDelete = this.computePrecisionKeysToDelete(step, session.answers, selectedOptions);
 this.cleanupSessionPrecisions(step, session.answers, selectedOptions);
-    ResponseService.addAnswer(responseId, normalized,keysToDelete);
-
+   // Sauvegarde dans la base 
+ResponseService.addAnswer(responseId, normalized,keysToDelete);
+// --- Valeur principale (pour la navigation) ---
     if (!step.isSubQuestion) {
       // Valeur principale
       let mainValue;
@@ -176,10 +183,18 @@ this.cleanupSessionPrecisions(step, session.answers, selectedOptions);
 
       //  Sauvegarder la valeur principale
       session.answers[answerKey] = mainValue;
+      // hadi non  Fusionner toutes les réponses normalisées (sous-questions incluses)
+Object.keys(normalized).forEach(key => {
+  // remplacer la clé DB par clé "answerKey" + suffixe si sous-question
+  if (key !== step.id_db) {
+    const subKey = key.replace(step.id_db, answerKey);
+    session.answers[subKey] = normalized[key];
+  }
+});
 // 🔹 Sauvegarde des précisions
 this.saveStepPrecisions({ step, rawValue, mainValue, sessionAnswers: session.answers });
 
-    
+        
 
      
     }

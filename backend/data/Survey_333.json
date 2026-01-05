@@ -14,7 +14,7 @@
         "label": "Quel est votre moyen de transport principal ttt ?",
         "placeholder": "Ex : Bus, Train, Voiture...",
         "help_text": "Indiquez le moyen que vous utilisez le plus souvent",
-        "redirection": "q3",
+        "redirection": "q24",
         "input_cond": "",
         "output_cond": "value.length > 0",
         "required": true,
@@ -621,35 +621,98 @@
         "id_db": "KO3HT8"
       },
       
-      {
-        "id_db": "UPI98Q",
-       "id": "q24",
-       "title": "Q72.",
-       "type": "single_choice",
-       "label": "Fréquence d’utilisation du transport en commun",
-       "page": 111,
-       "input_cond": "",
-       "output_cond": "value.length > 0",
-       "options": [
-         {
-           "codeItem": 1,
-           "label": "Tous les jours44"
-         },
-         {
-           "codeItem": 2,
-           "label": "Quelques fois par semaine mm"
-         },
-         {
-           "codeItem": 7,
-           "label": "Autre 88",
-           "requiresPrecision": true
-         }
-       ],
-       "placeholder": "",
-       "help_text": "Sélectionnez la fréquence la plus proche de votre utilisation",
-       "redirection": "FIN",
-       "required": true,
-       "isSubQuestion": false
-     }
+      {"id_db": "KO6HT8",
+        "id": "q24",
+        "type": "single_choice",
+        "label": "Fréquence d’utilisation du transport en commun",
+        "redirection": "q3",
+        "required": true,
+        "options": [
+          {
+            "codeItem": 1,
+            "label": "Tous les jours",
+            "subQuestions": [
+              {"id_db": "GO3A5U",
+                "id": "q24_1",
+                "type": "spinner",
+                "label": "  sub SPINNER qst?",
+                "options": [
+          {
+            "codeItem": 1,
+            "label": "SP A"
+          },
+          {
+            "codeItem": 2,
+            "label": " SP B",
+            "requiresPrecision": true
+          },
+          {
+            "codeItem": 3,
+            "label": "SB C"
+          }
+        ]
+              }
+            ]
+          },
+          {
+            "codeItem": 2,
+            "label": "Quelques fois par semaine",
+            "subQuestions": [
+              {"id_db": "KO3A5U",
+                "id": "q24_2",
+                "type": "single_choice",
+                "label": "  sub qst?",
+                "options": [
+          {
+            "codeItem": 4,
+            "label": "A"
+          },
+          {
+            "codeItem": 8,
+            "label": " S",
+            "requiresPrecision": true
+          },
+          {
+            "codeItem": 11,
+            "label": "z S"
+          }
+        ]
+              }
+            ]
+          },
+          {
+            "codeItem": 7,
+            "label": "Autre",
+            "subQuestions": [
+              {"id_db": "KO3T8U",
+                "id": "q24_7",
+                "type": "multiple_choice",
+                "label": "Quels transports utilisez-vous  sub qst?",
+                "options": [
+          {
+            "codeItem": 1,
+            "label": "BusS"
+          },
+          {
+            "codeItem": 2,
+            "label": "Train S",
+            "requiresPrecision": true
+          },
+          {
+            "codeItem": 3,
+            "label": "Voiture S"
+          },
+          {
+            "codeItem": 6,
+            "label": "Aucun S",
+            "exclusive": true
+          }
+        ]
+              }
+            ]
+          }
+        ]
+      }
+      
     ]
   }

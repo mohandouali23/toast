@@ -57,7 +57,6 @@ export const runSurveyPage = (req, res) => {
 
   const options = [];
   const preparedSteps = prepareSteps(stepsOnPage, req.session.answers, options);
-
   renderSurveyPage(res, survey, currentPage, preparedSteps, options);
 };
 

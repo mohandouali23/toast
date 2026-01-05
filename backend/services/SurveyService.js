@@ -52,6 +52,55 @@ static prepareStepForPage(step) {
   step.type_autocomplete = step.type === 'autocomplete';
   step.type_grid = step.type === 'grid';
   step.type_accordion = step.type === 'accordion';
+
+  if (step.options) {
+    step.options = step.options.map(option => {
+      option.hasSubQuestions =
+        Array.isArray(option.subQuestions) && option.subQuestions.length > 0;
+  
+      option.showSubQuestions = option.isSelected === true;
+  
+      if (option.hasSubQuestions) {
+        option.subQuestions = option.subQuestions.map(q => {
+          // ⚠ sécuriser tous les champs obligatoires
+          if (!q || !q.id || !q.type) return null;
+  
+          return {
+            id: q.id,
+            type: q.type,
+            label: q.label || '',
+            placeholder: q.placeholder || '',
+            options: q.options || [],
+            value: q.value || '',
+  
+            parentOption: option.codeItem,
+  
+            // flags pour accQuestion.mustache
+            isText: q.type === 'text',
+            isSingleChoice: q.type === 'single_choice',
+            isMultipleChoice: q.type === 'multiple_choice',
+            isSpinner: q.type === 'spinner'
+          };
+        }).filter(Boolean); // supprimer les sous-questions null
+      
+        if (step.options) {
+          step.options.forEach(opt => {
+            if (opt.subQuestions) {
+              opt.subQuestions.forEach(subQ => {
+                if (!subQ.id || !subQ.type || !subQ.label) {
+                  console.warn('Sous-question invalide détectée:', subQ);
+                }
+              });
+            }
+          });
+        }
+        
+      }
+  
+      return option;
+    });
+  }
+  
   return step;
 }
 

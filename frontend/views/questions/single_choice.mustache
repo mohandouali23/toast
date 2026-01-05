@@ -6,6 +6,14 @@
            {{#isSelected}}checked{{/isSelected}}>
     {{label}}
   </label><br>
+  {{#hasSubQuestions}}
+<div class="sub-questions" data-parent="{{codeItem}}" style="{{^showSubQuestions}}display:none;{{/showSubQuestions}}">
+  {{#subQuestions}}
+    {{> partials/accQuestion}}
+  {{/subQuestions}}
+</div>
+{{/hasSubQuestions}}
+
   <input type="text" 
   name="precision_{{codeItem}}"
    class="precision-input" 
@@ -17,15 +25,22 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('input[type=radio][name={{id}}]').forEach(radio => {
+  const questionId = "{{id}}"; // Mustache va remplacer
+  document.querySelectorAll(`input[type=radio][name="${questionId}"]`).forEach(radio => {
     radio.addEventListener('change', function() {
       document.querySelectorAll('.precision-input').forEach(i => i.style.display='none');
       if(this.dataset.requiresPrecision === 'true'){
         const precisionInput = document.querySelector(`input[name=precision_${this.value}]`);
         if (precisionInput) precisionInput.style.display='inline-block';
       }
+
+      // gérer sous-questions si besoin
+      document.querySelectorAll(`.sub-questions`).forEach(block => block.style.display='none');
+      const subBlock = document.querySelector(`.sub-questions[data-parent="${this.value}"]`);
+      if(subBlock) subBlock.style.display = 'block';
     });
   });
 });
 </script>
+
 
