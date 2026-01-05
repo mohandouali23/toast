@@ -15,12 +15,14 @@ export default class ResponseService {
   }
 
   // Ajouter ou fusionner une réponse dans un document existant
-  static async addAnswer(responseId, answer) {
+  static async addAnswer(responseId, answer,keysToDelete = []) {
     const response = await Response.findById(responseId);
     if (!response) throw new Error('Document introuvable');
 
     // fusionner Map existante avec les nouvelles réponses
     const currentAnswers = new Map(response.answers); // récupère l'existant
+     // ❌ Supprimer les anciennes clés
+  keysToDelete.forEach(key => currentAnswers.delete(key));
     for (const [key, value] of Object.entries(answer)) {
       currentAnswers.set(key, value);
     }

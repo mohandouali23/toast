@@ -98,6 +98,17 @@ export default class SurveyRunService {
     return { nextStep: { id: nextStepId } };
   }
 
+
+
+
+
+
+
+
+
+
+
+  
   /* ---------------- helpers ---------------- */
 
   static initSession(session) {
@@ -129,7 +140,14 @@ export default class SurveyRunService {
 
     // Normaliser et sauvegarder dans la base
     const normalized = ResponseNormalizer.normalize(step, rawValue, wrapper?.optionIndex);
-    ResponseService.addAnswer(responseId, normalized);
+   //  Calcul des clés à supprimer
+let selectedOptions = [];
+if (step.type === 'multiple_choice') {
+  selectedOptions = Array.isArray(body[step.id]) ? body[step.id] : [];
+}
+const keysToDelete = this.computePrecisionKeysToDelete(step, session.answers, selectedOptions);
+this.cleanupSessionPrecisions(step, session.answers, selectedOptions);
+    ResponseService.addAnswer(responseId, normalized,keysToDelete);
 
     if (!step.isSubQuestion) {
       // Valeur principale
@@ -156,29 +174,75 @@ export default class SurveyRunService {
         ? `${step.id}_${wrapper.optionIndex}`
         : step.id;
 
-      // 🔹 Sauvegarder la valeur principale
+      //  Sauvegarder la valeur principale
       session.answers[answerKey] = mainValue;
+// 🔹 Sauvegarde des précisions
+this.saveStepPrecisions({ step, rawValue, mainValue, sessionAnswers: session.answers });
 
-      // 🔹 Gérer la précision pour single_choice
-      if (step.type === 'single_choice') {
-        const selectedOption = step.options?.find(opt => opt.codeItem?.toString() === mainValue?.toString());
-        if (selectedOption?.requiresPrecision) {
-          const precisionValue = rawValue[`precision_${mainValue}`];
-          if (precisionValue && precisionValue.trim() !== '') {
-            session.answers[`${step.id}_pr_${mainValue}`] = precisionValue.trim();
-          }
-        }
+    
+
+     
+    }
+  });
+}
+
+static saveStepPrecisions({ step, rawValue, mainValue, sessionAnswers }) {
+  if (!step || !rawValue || !sessionAnswers) return;
+
+  // 🔹 Single Choice
+  if (step.type === 'single_choice') {
+    const selectedOption = step.options?.find(opt => opt.codeItem?.toString() === mainValue?.toString());
+    if (selectedOption?.requiresPrecision) {
+      const precisionValue = rawValue[`precision_${mainValue}`];
+      if (precisionValue && precisionValue.trim() !== '') {
+        sessionAnswers[`${step.id}_pr_${mainValue}`] = precisionValue.trim();
       }
+    }
+  }
 
-      // 🔹 Gérer les précisions pour multiple_choice
-      if (step.type === 'multiple_choice') {
-        mainValue.forEach(codeItem => {
-          const precisionKey = `precision_${step.id}_${codeItem}`;
-          const precisionValue = rawValue[precisionKey];
-          if (precisionValue && precisionValue.trim() !== '') {
-            session.answers[`${step.id}_pr_${codeItem}`] = precisionValue.trim();
-          }
-        });
+  // 🔹 Multiple Choice
+  if (step.type === 'multiple_choice' && Array.isArray(mainValue)) {
+    mainValue.forEach(codeItem => {
+      const precisionKey = `precision_${step.id}_${codeItem}`;
+      const precisionValue = rawValue[precisionKey];
+      if (precisionValue && precisionValue.trim() !== '') {
+        sessionAnswers[`${step.id}_pr_${codeItem}`] = precisionValue.trim();
+      }
+    });
+  }
+}
+
+static computePrecisionKeysToDelete(step, sessionAnswers, selectedOptions = []) {
+  const keysToDelete = [];
+
+  Object.keys(sessionAnswers).forEach(key => {
+    // single_choice
+    if (step.type === 'single_choice' && key.startsWith(`${step.id}_pr_`)) {
+      keysToDelete.push(key.replace(`${step.id}_pr_`, `${step.id_db}_pr_`));
+    }
+
+    // multiple_choice
+    if (step.type === 'multiple_choice' && key.startsWith(`${step.id}_pr_`)) {
+      const optionCode = key.replace(`${step.id}_pr_`, '');
+      if (!selectedOptions.includes(optionCode)) {
+        keysToDelete.push(key.replace(`${step.id}_pr_`, `${step.id_db}_pr_`));
+      }
+    }
+  });
+
+  return keysToDelete;
+}
+
+
+static cleanupSessionPrecisions(step, sessionAnswers, selectedOptions = []) {
+  Object.keys(sessionAnswers).forEach(key => {
+    if (step.type === 'single_choice' && key.startsWith(`${step.id}_pr_`)) {
+      delete sessionAnswers[key];
+    }
+    if (step.type === 'multiple_choice' && key.startsWith(`${step.id}_pr_`)) {
+      const optionCode = key.replace(`${step.id}_pr_`, '');
+      if (!selectedOptions.includes(optionCode)) {
+        delete sessionAnswers[key];
       }
     }
   });

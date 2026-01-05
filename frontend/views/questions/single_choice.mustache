@@ -6,7 +6,12 @@
            {{#isSelected}}checked{{/isSelected}}>
     {{label}}
   </label><br>
-  <input type="text" name="precision_{{codeItem}}" class="precision-input" style="display:none;" placeholder="Précisez..." />
+  <input type="text" 
+  name="precision_{{codeItem}}"
+   class="precision-input" 
+   style="{{^showPrecision}}display:none;{{/showPrecision}}"
+   value="{{precisionValue}}"
+   placeholder="Précisez..." />
 {{/options}}
 
 

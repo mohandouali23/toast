@@ -14,7 +14,7 @@
         "label": "Quel est votre moyen de transport principal ttt ?",
         "placeholder": "Ex : Bus, Train, Voiture...",
         "help_text": "Indiquez le moyen que vous utilisez le plus souvent",
-        "redirection": "q3",
+        "redirection": "q14",
         "input_cond": "",
         "output_cond": "value.length > 0",
         "required": true,
@@ -141,42 +141,12 @@
       },
     
       {
-        "id_db": "UPI98Q",
-       "id": "q24",
-       "title": "Q72.",
-       "type": "single_choice",
-       "label": "Fréquence d’utilisation du transport en commun",
-       "page": 2,
-       "input_cond": "",
-       "output_cond": "value.length > 0",
-       "options": [
-         {
-           "codeItem": 1,
-           "label": "Tous les jours44"
-         },
-         {
-           "codeItem": 2,
-           "label": "Quelques fois par semaine mm"
-         },
-         {
-           "codeItem": 7,
-           "label": "Autre 88",
-           "requiresPrecision": true
-         }
-       ],
-       "placeholder": "",
-       "help_text": "Sélectionnez la fréquence la plus proche de votre utilisation",
-       "redirection": "q3",
-       "required": true,
-       "isSubQuestion": false
-     },
-      {
          "id_db": "UPI3DQ",
         "id": "q2",
         "title": "Q2.",
         "type": "single_choice",
         "label": "Fréquence d’utilisation du transport en commun",
-        "page": 17,
+        "page": 2,
         "input_cond": "",
         "output_cond": "value.length > 0",
         "options": [
@@ -196,7 +166,7 @@
         ],
         "placeholder": "",
         "help_text": "Sélectionnez la fréquence la plus proche de votre utilisation",
-        "redirection": "q4",
+        "redirection": "q44",
         "required": true,
         "isSubQuestion": false,
         "navigation": {
@@ -217,6 +187,7 @@
       },
       {"id_db": "YP3ZE3",
       "id": "q44",
+      "redirection": "q4",
         "page": 3,
         "description": "Cette page contient des informations importantes avant les questions suivantes"
         
@@ -265,7 +236,7 @@
         "title": "Q5.",
         "type": "spinner",
         "label": "Choisissez votre région",
-        "page": 16,
+        "page": 6,
         "options": [
           {
             "codeItem": 1,
@@ -300,7 +271,7 @@
         "label": "Informations complémentaires sur vos transports",
         "page": 7,
         "required": true,
-        "redirection": "q14",
+        "redirection": "q17",
       
         "sections": [
           {"id_db_sect": "14R400",
@@ -352,7 +323,7 @@
   "title": "Q17.",
   "label": "Satisfaction concernant vos moyens de transport",
   "page": 8,
-  "redirection": "q13",
+  "redirection": "q14",
   "required": true,
   "sections": [
     {
@@ -444,12 +415,13 @@
         "title": "Q14.",
         "label": "Activités pratiquées et motivation principale du séjour",
         "required": true,
-        "redirection": "q17",
-        "page": 8,
+        "redirection": "q15",
+        "page": 9,
         "questions": [
           { "id_db_qst": "Y1UEG9_q14_1",
           "id": "q14_1",
            "label": "Se promener, flâner",
+           "required": true,
            "cells": {
             "R1": { "enabled": true },
             "R2": { "enabled": true }
@@ -458,6 +430,7 @@
           { "id_db_qst": "Y1UEG9_q14_2",
           "id": "q14_2", 
           "label": "Visites de musées, monuments" ,
+          "required": false,
           "cells": {
             "R1": { "enabled": true },
             "R2": { "enabled": false }
@@ -465,6 +438,7 @@
           { "id_db_qst": "Y1UEG9_q14_3",
           "id": "q14_3",
            "label": "Parcs, jardins, sites naturels",
+           "required": true,
            "cells": {
             "R1": { "enabled": true },
             "R2": { "enabled": true }
@@ -503,10 +477,10 @@
         "id": "q13",
         "type": "grid",
         "title": "Q13.",
-        "page": 9,
+        "page":10,
         "label": "Activités pratiquées et motivation principale du séjour",
         "required": true,
-        "redirection": "q3",
+        "redirection": "FIN",
         "questions": [
           { "id_db_qst": "Y1UEGY_q13_1",
            "id": "q13_1", "label": "Se promener, flâner" },
@@ -565,15 +539,15 @@
         "id": "q15",
         "type": "grid",
         "title": "Q15.",
-        "page": 10,
+        "page": 11,
         "label": "Activités pratiquées et motivation principale du séjour",
         "required": true,
-        "redirection": "FIN",
+        "redirection": "q13",
         "questions": [
-          { "id_db_qst": "Y1U3FY_q15_1", "id": "q15_1", "label": "Se promener, flâner" },
-          { "id_db_qst": "Y1U3FY_q15_2","id": "q15_2", "label": "Visites de musées, monuments" },
-          { "id_db_qst": "Y1U3FY_q15_3","id": "q15_3", "label": "Parcs, jardins, sites naturels" },
-          { "id_db_qst": "Y1U3FY_q15_4","id": "q15_4", "label": "Visites guidées de quartiers" }
+          { "id_db_qst": "Y1U3FY_q15_1", "id": "q15_1", "label": "Se promener, flâner","required": true },
+          { "id_db_qst": "Y1U3FY_q15_2","id": "q15_2", "label": "Visites de musées, monuments" ,"required": true},
+          { "id_db_qst": "Y1U3FY_q15_3","id": "q15_3", "label": "Parcs, jardins, sites naturels","required": false },
+          { "id_db_qst": "Y1U3FY_q15_4","id": "q15_4", "label": "Visites guidées de quartiers","required": true }
         ],
       
         "reponses": [
@@ -649,6 +623,37 @@
         "output_cond": "value.length > 0",
         "isSubQuestion": false,
         "id_db": "KO3HT8"
-      }
+      },
+      
+      {
+        "id_db": "UPI98Q",
+       "id": "q24",
+       "title": "Q72.",
+       "type": "single_choice",
+       "label": "Fréquence d’utilisation du transport en commun",
+       "page": 111,
+       "input_cond": "",
+       "output_cond": "value.length > 0",
+       "options": [
+         {
+           "codeItem": 1,
+           "label": "Tous les jours44"
+         },
+         {
+           "codeItem": 2,
+           "label": "Quelques fois par semaine mm"
+         },
+         {
+           "codeItem": 7,
+           "label": "Autre 88",
+           "requiresPrecision": true
+         }
+       ],
+       "placeholder": "",
+       "help_text": "Sélectionnez la fréquence la plus proche de votre utilisation",
+       "redirection": "FIN",
+       "required": true,
+       "isSubQuestion": false
+     }
     ]
   }

@@ -109,16 +109,30 @@ static prepareStepForPage(step) {
   
         // CHECKBOX
         if (isCheckbox) {
-          name = `value[${row.id}][${col.id}][]`;
-          value = row.id;
-  
-          if (
-            Array.isArray(existingAnswer?.[col.id]) &&
-            existingAnswer[col.id].some(v => v.value === row.id)
-          ) {
-            checked = true;
-          }
-        }
+          // name = `value[${row.id}][${col.id}][]`;
+          // value = row.id;
+          name = `value[${row.id}][]`;
+          value = col.id;
+
+          checked =
+          Array.isArray(existingAnswer?.[row.id]) &&
+          existingAnswer[row.id].includes(col.id);
+      }
+  //1 // On vérifie uniquement la ligne et la colonne correspondantes
+  // if (
+  //   existingAnswer?.[row.id]?.[col.id] &&
+  //   Array.isArray(existingAnswer[row.id][col.id]) &&
+  //   existingAnswer[row.id][col.id].includes(row.id)
+  // ) {
+  //   checked = true;
+  // }
+          //2 if (
+          //   Array.isArray(existingAnswer?.[col.id]) &&
+          //   existingAnswer[col.id].some(v => v.value === row.id)
+          // ) {
+          //   checked = true;
+          // }
+        //}
   
         return {
           ...col,

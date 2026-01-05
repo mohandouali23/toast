@@ -2,6 +2,7 @@ export default class ResponseNormalizer {
   static normalize(step, rawValue, optionIndex=null) {
     const idDB = optionIndex ? `${step.id_db}_${optionIndex}` : step.id_db;
     let value;
+    console.log('rawvaluegrid',rawValue)
 
     switch(step.type) {
      
@@ -154,30 +155,58 @@ export default class ResponseNormalizer {
             /* ===========================
                CHECKBOX (row / column)
                =========================== */
-            if (typeof rawAnswer === 'object') {
-              Object.keys(rawAnswer).forEach(responseId => {
-                const response = responsesById[responseId];
-                if (!response) return;
+               // ===========================
+// CHECKBOX GRID (array)
+// ===========================
+if (Array.isArray(rawAnswer)) {
+  rawAnswer.forEach(responseId => {
+    const response = responsesById[responseId];
+    if (!response) return;
 
-         if (!isCellEnabled(question, responseId)) return;
+    if (!isCellEnabled(question, responseId)) return;
 
-                const axis = response.input.axis;
+    const axis = response.input.axis;
+
+    // ----- AXE ROW -----
+    if (axis === 'row') {
+      value[question.id] = value[question.id]
+        ? `${value[question.id]}/${responseId}`
+        : responseId;
+    }
+
+    // ----- AXE COLUMN -----
+    if (axis === 'column') {
+      value[responseId] = value[responseId]
+        ? `${value[responseId]}/${question.id}`
+        : question.id;
+    }
+  });
+}
+
+        //     if (typeof rawAnswer === 'object') {
+        //       Object.keys(rawAnswer).forEach(responseId => {
+        //         const response = responsesById[responseId];
+        //         if (!response) return;
+
+        //  if (!isCellEnabled(question, responseId)) return;
+
+        //         const axis = response.input.axis;
         
-                // ----- AXE ROW -----
-                if (axis === 'row') {
-                  value[question.id] = value[question.id]
-                    ? `${value[question.id]}/${responseId}`
-                    : responseId;
-                }
+        //         // ----- AXE ROW -----
+        //         if (axis === 'row') {
+        //           value[question.id] = value[question.id]
+        //             ? `${value[question.id]}/${responseId}`
+        //             : responseId;
+        //         }
         
-                // ----- AXE COLUMN -----
-                if (axis === 'column') {
-                  value[responseId] = value[responseId]
-                    ? `${value[responseId]}/${question.id}`
-                    : question.id;
-                }
-              });
-            }
+        //         // ----- AXE COLUMN -----
+        //         if (axis === 'column') {
+        //           value[responseId] = value[responseId]
+        //             ? `${value[responseId]}/${question.id}`
+        //             : question.id;
+        //         }
+        //       });
+        //     }
           });
         
           

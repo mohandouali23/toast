@@ -40,62 +40,6 @@ export const endSurvey = (req, res) => {
   });
 };
 
-
-
-// export const runSurveyPage = (req, res) => {
-//   const { surveyId } = req.params;
-//   const survey = SurveyService.loadSurvey(surveyId);
-
-//   if (!req.session.answers) req.session.answers = {};
-
-//   // Déterminer currentStepId
-//   if (!req.session.currentStepId) {
-//     const firstStep = survey.steps
-//       .filter(s => s.page !== undefined)
-//       .sort((a, b) => a.page - b.page)[0];
-//     req.session.currentStepId = firstStep.id;
-//   }
-
-//   const currentStep = survey.steps.find(step => step.id === req.session.currentStepId);
-//   if (!currentStep) return res.redirect(`/survey/${surveyId}/end`);
-
-//   const currentPage = currentStep.page;
-
-//   // Récupérer les steps à afficher
-//   let stepsOnPage = Array.isArray(req.session.rotationQueue) && req.session.rotationQueue.length > 0
-//     ? [req.session.rotationQueue[0].step]
-//     : survey.steps.filter(step => step.page === currentPage);
-
-//   let options = [];
-
-//   const preparedSteps = stepsOnPage.map(step => {
-//     if (step.type === 'grid') step = SurveyService.prepareGridB(step);
-//     if (step.type === 'autocomplete') options = AutoCompleteUtils.getAutocompleteOptions(step);
-//     if (step.type === 'accordion') {
-//       step.sections = step.sections.map(section => ({
-//         ...section,
-//         questions: section.questions.map(q => AccordionUtils.prepareQuestionFlags(q))
-//       }));
-//     }
-
-//     // Pré-remplissage
-//    if (typeof AnswerPrefillUtils[step.type] === 'function') {
-//       AnswerPrefillUtils[step.type](step, req.session.answers);
-//     }
-
-//     return SurveyService.prepareStepForPage(step);
-//   });
-
-//   res.render('questions/page', { survey, steps: preparedSteps, options }, (err, html) => {
-//     if (err) return res.status(500).send('Erreur rendu page');
-//     res.render('layout', {
-//       survey,
-//       step: { id: `page-${currentPage}`, type: 'page', title: survey.title },
-//       content: html
-//     });
-//   });
-// };
-
 /**
  * Contrôleur principal pour afficher une page de questionnaire
  */
@@ -147,8 +91,12 @@ function getStepsForPage(req, survey, page) {
 function prepareSteps(steps, sessionAnswers, options) {
   return steps.map(step => {
     // Préparer selon le type
-    if (step.type === 'grid') step = SurveyService.prepareGridB(step);
-    if (step.type === 'autocomplete') options.push(...AutoCompleteUtils.getAutocompleteOptions(step));
+   // if (step.type === 'grid') step = SurveyService.prepareGridB(step);
+   if (step.type === 'grid') {
+    const existingAnswer = sessionAnswers[step.id]?.value;
+    step = SurveyService.prepareGridB(step, existingAnswer);
+  } 
+   if (step.type === 'autocomplete') options.push(...AutoCompleteUtils.getAutocompleteOptions(step));
     if (step.type === 'accordion') prepareAccordion(step);
 
     prefillStep(step, sessionAnswers);
