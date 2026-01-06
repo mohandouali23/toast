@@ -26,7 +26,7 @@ export default router;
 // const router = express.Router();
 
 // router.post('/:surveyId/run', async (req, res) => {
-//   const { surveyId } = req.params;
+  //   const { surveyId } = req.params;
 //   const action = req.body.action || 'next';
 //   const userId = 'anonymous';
 
@@ -109,7 +109,7 @@ export default router;
 //           if (isInRotation && stepWrapper.optionIndex !== undefined) {
 //             req.session.answers[`${step.id}_${stepWrapper.optionIndex}`] = mainValue;
 //           } else {
-//             req.session.answers[step.id] = mainValue;
+  //             req.session.answers[step.id] = mainValue;
 //           }
 //         }
 //       }

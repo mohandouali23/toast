@@ -23,13 +23,13 @@ export const downloadSurveyResponses = async (req, res) => {
 export const endSurvey = (req, res) => {
   const { surveyId } = req.params;
   const survey = SurveyService.loadSurvey(surveyId);
-
+  
   req.session.destroy(err => {
     if (err) console.error('Erreur destruction session:', err);
   });
-
+  
   const step = { type: 'end', id: 'end', title: 'Fin du questionnaire' };
-
+  
   res.render('end', { 
     surveyId,
     restartUrl: `/survey/${surveyId}/run`,
@@ -41,20 +41,20 @@ export const endSurvey = (req, res) => {
 };
 
 /**
- * Contrôleur principal pour afficher une page de questionnaire
- */
+* Contrôleur principal pour afficher une page de questionnaire
+*/
 export const runSurveyPage = (req, res) => {
   const { surveyId } = req.params;
   const survey = SurveyService.loadSurvey(surveyId);
-
+  
   initSession(req);
-
+  
   const currentStep = getCurrentStep(req, survey);
   if (!currentStep) return res.redirect(`/survey/${surveyId}/end`);
-
+  
   const currentPage = currentStep.page;
   const stepsOnPage = getStepsForPage(req, survey, currentPage);
-
+  
   const options = [];
   const preparedSteps = prepareSteps(stepsOnPage, req.session.answers, options,req.session.rotationQueue || []);
   renderSurveyPage(res, survey, currentPage, preparedSteps, options);
@@ -71,8 +71,8 @@ function initSession(req) {
 function getCurrentStep(req, survey) {
   if (!req.session.currentStepId) {
     const firstStep = survey.steps
-      .filter(s => s.page !== undefined)
-      .sort((a, b) => a.page - b.page)[0];
+    .filter(s => s.page !== undefined)
+    .sort((a, b) => a.page - b.page)[0];
     req.session.currentStepId = firstStep.id;
   }
   return survey.steps.find(step => step.id === req.session.currentStepId);
@@ -89,7 +89,7 @@ function getStepsForPage(req, survey, page) {
 // Préparer chaque step : grid, autocomplete, accordion + pré-remplissage
 function prepareSteps(steps, sessionAnswers, options, rotationQueue = []) {
   return steps.map(step => {
-
+    
     const rotationItem = rotationQueue.find(r => r.step.id === step.id);
     if (rotationItem) {
       step.wrapper = {
@@ -99,28 +99,28 @@ function prepareSteps(steps, sessionAnswers, options, rotationQueue = []) {
         optionIndex: rotationItem.optionIndex,
         optionLabel: rotationItem.optionLabel
       };
-  //step.wrapper = rotationItem;
-  console.log('  step.wrapper = rotationItem',rotationItem)
-  // Assurer que optionIndex est défini
-  if (step.wrapper.optionIndex === undefined && step.wrapper.optionCode !== undefined) {
-    step.wrapper.optionIndex = step.wrapper.optionCode;
-  }
-}
-
+      //step.wrapper = rotationItem;
+      console.log('  step.wrapper = rotationItem',rotationItem)
+      // Assurer que optionIndex est défini
+      if (step.wrapper.optionIndex === undefined && step.wrapper.optionCode !== undefined) {
+        step.wrapper.optionIndex = step.wrapper.optionCode;
+      }
+    }
+    
     // Préparer selon le type
-   // if (step.type === 'grid') step = SurveyService.prepareGridB(step);
-   if (step.type === 'grid') {
-    const existingAnswer = sessionAnswers[step.id]?.value;
-    step = SurveyService.prepareGridB(step, existingAnswer);
-  } 
-   if (step.type === 'autocomplete') options.push(...AutoCompleteUtils.getAutocompleteOptions(step));
+    // if (step.type === 'grid') step = SurveyService.prepareGridB(step);
+    if (step.type === 'grid') {
+      const existingAnswer = sessionAnswers[step.id]?.value;
+      step = SurveyService.prepareGridB(step, existingAnswer);
+    } 
+    if (step.type === 'autocomplete') options.push(...AutoCompleteUtils.getAutocompleteOptions(step));
     if (step.type === 'accordion') prepareAccordion(step);
-
+    
     prefillStep(step, sessionAnswers);
-// ---- Rotation : si step a un wrapper (dans rotation) ----
-if (step.wrapper) {
-  prefillRotationStep(step, sessionAnswers);
-}
+    // ---- Rotation : si step a un wrapper (dans rotation) ----
+    if (step.wrapper) {
+      prefillRotationStep(step, sessionAnswers);
+    }
     return SurveyService.prepareStepForPage(step);
   });
 }
@@ -140,9 +140,9 @@ function prefillStep(step, sessionAnswers) {
   }
 }
 function prefillRotationStep(step, sessionAnswers) {
- if (!step.wrapper) return;
- const indexOrCode = step.wrapper.optionIndex ?? step.wrapper.optionCode;
- const rotationKey = `${step.id}_${indexOrCode}`; // ex: q3_2_1
+  if (!step.wrapper) return;
+  const indexOrCode = step.wrapper.optionIndex ?? step.wrapper.optionCode;
+  const rotationKey = `${step.id}_${indexOrCode}`; // ex: q3_2_1
   if (typeof AnswerPrefillUtils[step.type] === 'function') {
     // Appeler le pré-remplissage comme pour une question normale
     AnswerPrefillUtils[step.type](step, sessionAnswers, rotationKey);
@@ -157,7 +157,7 @@ function prefillRotationStep(step, sessionAnswers) {
 function renderSurveyPage(res, survey, page, steps, options) {
   res.render('questions/page', { survey, steps, options }, (err, html) => {
     if (err) return res.status(500).send('Erreur rendu page');
-
+    
     res.render('layout', {
       survey,
       step: { id: `page-${page}`, type: 'page', title: survey.title },

@@ -1,26 +1,26 @@
 {
-    "id": "survey_333",
-    "title": "Enquête Questionnaire",
-    "title_app": "Enquête Questionnaire_ARP",
-    "version": "1.0",
-    "mode_enqueteur": "Enqueteur",
-   "description": "Collecte des informations sur les transports",
-    "steps": [
-      {
-        "id_db": "04W4LP",
-        "id": "q1",
-        "title": "Q1.",
-        "type": "text",
-        "label": "Quel est votre moyen de transport principal ttt ?",
-        "placeholder": "Ex : Bus, Train, Voiture...",
-        "help_text": "Indiquez le moyen que vous utilisez le plus souvent",
-        "redirection": "q24",
-        "input_cond": "",
-        "output_cond": "value.length > 0",
-        "required": true,
-        "isSubQuestion": false,
-        "page": 1
-        
+  "id": "survey_333",
+  "title": "Enquête Questionnaire",
+  "title_app": "Enquête Questionnaire_ARP",
+  "version": "1.0",
+  "mode_enqueteur": "Enqueteur",
+  "description": "Collecte des informations sur les transports",
+  "steps": [
+    {
+      "id_db": "04W4LP",
+      "id": "q1",
+      "title": "Q1.",
+      "type": "text",
+      "label": "Quel est votre moyen de transport principal ttt ?",
+      "placeholder": "Ex : Bus, Train, Voiture...",
+      "help_text": "Indiquez le moyen que vous utilisez le plus souvent",
+      "redirection": "q3",
+      "input_cond": "",
+      "output_cond": "value.length > 0",
+      "required": true,
+      "isSubQuestion": false,
+      "page": 1
+      
       },{
         "id_db": "ER8136",
         "id": "q3",
@@ -77,36 +77,36 @@
           "default": "redirection"
         }
       },
-
+      
       {
-       "id_db": "ER8137",
-       "id": "q3_1",
-       "title": "Q3.1",
-       "type": "single_choice",
-       "label": "À quelle fréquence utilisez-vous le TRANSPORT ?",
-       "page": 99,
-       "repeatFor": "q3",
-       "input_cond": "",
-       "output_cond": "value.length > 0",
-       "options": [
-    { "codeItem": 1, "label": "Tous les jours 1" },
-    { "codeItem": 2, "label": "Quelques fois par semaine2" },
-    { "codeItem": 3, "label": "Rarement33" }
-  ],
-       "placeholder": "",
-       "help_text": "Sélectionnez la fréquence la plus proche de votre utilisation",
-       "redirection": "q3_2",
-       "required": true,
-       "isSubQuestion": false
-     },
-
-     {
+        "id_db": "ER8137",
+        "id": "q3_1",
+        "title": "Q3.1",
+        "type": "single_choice",
+        "label": "À quelle fréquence utilisez-vous le TRANSPORT ?",
+        "page": 99,
+        "repeatFor": "q3",
+        "input_cond": "",
+        "output_cond": "value.length > 0",
+        "options": [
+          { "codeItem": 1, "label": "Tous les jours 1" },
+          { "codeItem": 2, "label": "Quelques fois par semaine2" },
+          { "codeItem": 3, "label": "Rarement33" }
+        ],
+        "placeholder": "",
+        "help_text": "Sélectionnez la fréquence la plus proche de votre utilisation",
+        "redirection": "q3_2",
+        "required": true,
+        "isSubQuestion": false
+      },
+      
+      {
         "id_db": "ER8138",
-  "id": "q3_2",
-  "title": "Q3.2",
-  "type": "text",
-  "repeatFor": "q3",
-  "label": "Précisez les lignes ou destinations que vous utilisez en TRANSPORT :",
+        "id": "q3_2",
+        "title": "Q3.2",
+        "type": "text",
+        "repeatFor": "q3",
+        "label": "Précisez les lignes ou destinations que vous utilisez en TRANSPORT :",
         "placeholder": "Ex : b12 b15...",
         "help_text": "",
         "redirection": "q3_3",
@@ -117,31 +117,31 @@
         "page": 99
         
       },
-
+      
       {
         "id_db": "ER8139",
-  "id": "q3_3",
-  "title": "Q3.3",
-  "repeatFor": "q3",
-  "type": "single_choice",
-  "label": "Pour quels motifs utilisez-vous la TRANSPORT ?",
+        "id": "q3_3",
+        "title": "Q3.3",
+        "repeatFor": "q3",
+        "type": "single_choice",
+        "label": "Pour quels motifs utilisez-vous la TRANSPORT ?",
         "page": 99,
         "input_cond": "",
         "output_cond": "value.length > 0",
-       "options": [
-    { "codeItem": 1, "label": "Travail" },
-    { "codeItem": 2, "label": "Loisirs" },
-    { "codeItem": 3, "label": "Courses / Déplacements quotidiens" }
-  ],
+        "options": [
+          { "codeItem": 1, "label": "Travail" },
+          { "codeItem": 2, "label": "Loisirs" },
+          { "codeItem": 3, "label": "Courses / Déplacements quotidiens" }
+        ],
         "placeholder": "",
         "help_text": "Sélectionnez la fréquence la plus proche de votre utilisation",
-      
+        
         "required": true,
         "isSubQuestion": false
       },
-    
+      
       {
-         "id_db": "UPI3DQ",
+        "id_db": "UPI3DQ",
         "id": "q2",
         "title": "Q2.",
         "type": "single_choice",
@@ -170,153 +170,153 @@
         "required": true,
         "isSubQuestion": false,
         "navigation": {
-        "rules": [
-          {
-            "if": {
-              "operator": "EQUALS",
-              "field": "codeItem",
-              "value": 1
-            },
-            "then": {
-              "goTo": "q6"
+          "rules": [
+            {
+              "if": {
+                "operator": "EQUALS",
+                "field": "codeItem",
+                "value": 1
+              },
+              "then": {
+                "goTo": "q6"
+              }
             }
-          }
-        ],
-        "default": "redirection"
-      }
+          ],
+          "default": "redirection"
+        }
       },
       {"id_db": "YP3ZE3",
       "id": "q44",
       "redirection": "q4",
-        "page": 3,
-        "description": "Cette page contient des informations importantes avant les questions suivantes"
-        
-      },
+      "page": 3,
+      "description": "Cette page contient des informations importantes avant les questions suivantes"
       
-      {
-        "id_db": "YP3O0G",
-        "id": "q4",
-        "title": "Q4.",
-        "type": "autocomplete",
-        "label": "Votre commune de résidence",
-        "page": 5,
-        "table": "communes",
-        "columns": [
-          {
-            "name": "commune",
-            "displayInList": true,
-            "displayInInput": true,
-            "saveInDB": true
-          },
-          {
-            "name": "cp",
-            "displayInList": true,
-            "displayInInput": false,
-            "saveInDB": false
-          },
-          {
-            "name": "_id",
-            "displayInList": false,
-            "displayInInput": false,
-            "saveInDB": true
-          }
-        ],
-        "placeholder": "Tapez pour rechercher votre commune",
-        "help_text": "Commencez à taper et sélectionnez la commune correspondante",
-        "redirection": "q5",
-        "input_cond": "",
-        "output_cond": "value !== null",
-        "required": true,
-        "isSubQuestion": false
-       
-      },
-      {
-        "id_db": "5Z10ZZ",
-        "id": "q5",
-        "title": "Q5.",
-        "type": "spinner",
-        "label": "Choisissez votre région",
-        "page": 6,
-        "options": [
-          {
-            "codeItem": 1,
-            "label": "Sud"
-          },
-          {
-            "codeItem": 2,
-            "label": "Est"
-          },
-          {
-            "codeItem": 3,
-            "label": "Ouest"
-          },
-          {
-            "codeItem": 4,
-            "label": "Centre"
-          }
-          
-        ],
-        "placeholder": "Sélectionnez une option",
-        "required": true,
-        "redirection": "q16",
-        "isSubQuestion": false
-        
-        
-      },
-      {
-        "id_db": "14R4LP",
-        "id": "q16",
-        "type": "accordion",
-        "title": "Q16.",
-        "label": "Informations complémentaires sur vos transports",
-        "page": 7,
-        "required": true,
-        "redirection": "q17",
+    },
+    
+    {
+      "id_db": "YP3O0G",
+      "id": "q4",
+      "title": "Q4.",
+      "type": "autocomplete",
+      "label": "Votre commune de résidence",
+      "page": 5,
+      "table": "communes",
+      "columns": [
+        {
+          "name": "commune",
+          "displayInList": true,
+          "displayInInput": true,
+          "saveInDB": true
+        },
+        {
+          "name": "cp",
+          "displayInList": true,
+          "displayInInput": false,
+          "saveInDB": false
+        },
+        {
+          "name": "_id",
+          "displayInList": false,
+          "displayInInput": false,
+          "saveInDB": true
+        }
+      ],
+      "placeholder": "Tapez pour rechercher votre commune",
+      "help_text": "Commencez à taper et sélectionnez la commune correspondante",
+      "redirection": "q5",
+      "input_cond": "",
+      "output_cond": "value !== null",
+      "required": true,
+      "isSubQuestion": false
       
-        "sections": [
-          {"id_db_sect": "14R400",
-            "id_sect": "q16_sect1",
-            "title": "Bus",
-            "questions": [
-              {"id_db": "A2R4LO",
-                "id": "q10_1",
-                "type": "single_choice",
-                "label": "Utilisez-vous le bus ?",
-                "required": true,
-                "options": [
-                  { "codeItem": 1, "label": "Oui" },
-                  { "codeItem": 2, "label": "Non" }
-                ]
-              },
-              {"id_db": "A2R7LP",
-                "id": "q10_2",
-                "type": "text",
-                "label": "Quelle ligne utilisez-vous ?",
-                "required": false
-              }
-            ]
-          },
-          {"id_db_sect": "B7RL2O",
-            "id_sect": "q16_sect2",
-            "title": "Pays U.E",
-            "questions": [
-              {"id_db": "A2M7LP",
-                "id": "q10_3",
-                "type": "multiple_choice",
-                "label": "",
-                "required": true,
-                "options": [
-                  { "codeItem": 1,  "label": "France"},
-                  { "codeItem": 2, "label": "Allemagne"},
-                  { "codeItem": 3, "label": "Royaume-Uni"},
-                  { "codeItem": 4,  "label": "Belgique"}
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
+    },
+    {
+      "id_db": "5Z10ZZ",
+      "id": "q5",
+      "title": "Q5.",
+      "type": "spinner",
+      "label": "Choisissez votre région",
+      "page": 6,
+      "options": [
+        {
+          "codeItem": 1,
+          "label": "Sud"
+        },
+        {
+          "codeItem": 2,
+          "label": "Est"
+        },
+        {
+          "codeItem": 3,
+          "label": "Ouest"
+        },
+        {
+          "codeItem": 4,
+          "label": "Centre"
+        }
+        
+      ],
+      "placeholder": "Sélectionnez une option",
+      "required": true,
+      "redirection": "q16",
+      "isSubQuestion": false
+      
+      
+    },
+    {
+      "id_db": "14R4LP",
+      "id": "q16",
+      "type": "accordion",
+      "title": "Q16.",
+      "label": "Informations complémentaires sur vos transports",
+      "page": 7,
+      "required": true,
+      "redirection": "q17",
+      
+      "sections": [
+        {"id_db_sect": "14R400",
+        "id_sect": "q16_sect1",
+        "title": "Bus",
+        "questions": [
+          {"id_db": "A2R4LO",
+          "id": "q10_1",
+          "type": "single_choice",
+          "label": "Utilisez-vous le bus ?",
+          "required": true,
+          "options": [
+            { "codeItem": 1, "label": "Oui" },
+            { "codeItem": 2, "label": "Non" }
+          ]
+        },
+        {"id_db": "A2R7LP",
+        "id": "q10_2",
+        "type": "text",
+        "label": "Quelle ligne utilisez-vous ?",
+        "required": false
+      }
+    ]
+  },
+  {"id_db_sect": "B7RL2O",
+  "id_sect": "q16_sect2",
+  "title": "Pays U.E",
+  "questions": [
+    {"id_db": "A2M7LP",
+    "id": "q10_3",
+    "type": "multiple_choice",
+    "label": "",
+    "required": true,
+    "options": [
+      { "codeItem": 1,  "label": "France"},
+      { "codeItem": 2, "label": "Allemagne"},
+      { "codeItem": 3, "label": "Royaume-Uni"},
+      { "codeItem": 4,  "label": "Belgique"}
+    ]
+  }
+]
+}
+]
+},
+{
   "id_db": "SAT01",
   "id": "q17",
   "type": "accordion",
@@ -408,312 +408,312 @@
     }
   ]
 },
-      {
-        "id_db": "Y1UEG9",
-        "id": "q14",
-        "type": "grid",
-        "title": "Q14.",
-        "label": "Activités pratiquées et motivation principale du séjour",
-        "required": true,
-        "redirection": "q13",
-        "page": 9,
-        "questions": [
-          { "id_db_qst": "Y1UEG9_q14_1",
-          "id": "q14_1",
-           "label": "Se promener, flâner",
-           "required": true,
-           "cells": {
-            "R1": { "enabled": true },
-            "R2": { "enabled": true }
-          }
-           },
-          { "id_db_qst": "Y1UEG9_q14_2",
-          "id": "q14_2", 
-          "label": "Visites de musées, monuments" ,
-          "required": false,
-          "cells": {
-            "R1": { "enabled": true },
-            "R2": { "enabled": false }
-          }},
-          { "id_db_qst": "Y1UEG9_q14_3",
-          "id": "q14_3",
-           "label": "Parcs, jardins, sites naturels",
-           "required": true,
-           "cells": {
-            "R1": { "enabled": true },
-            "R2": { "enabled": true }
-          } }
-        ],
-      
-        "reponses": [
-          {"id_db_rps":"Y1UEG9_R1",
-            "id": "R1",
-            "label": "oui",
-            "input": {
-              "type": "radio",
-              "axis": "row",
-              "validation": {
-                "min": 1
-              }
-            }
-          },
-          {
-            "id_db_rps":"Y1UEG9_R2",
-            "id": "R2",
-            "label": "non",
-            "input": {
-              "type": "radio",
-              "axis": "row",
-              "validation": {
-                "required": true,
-                "min": 1
-              }
-            }
-          }
-        ]
-      }, 
-      {
-        "id_db": "Y1UEGY",
-        "id": "q13",
-        "type": "grid",
-        "title": "Q13.",
-        "page":10,
-        "label": "Activités pratiquées et motivation principale du séjour",
-        "required": true,
-        "redirection": "q15",
-        "questions": [
-          { "id_db_qst": "Y1UEGY_q13_1",
-           "id": "q13_1", "label": "Se promener, flâner" },
-          { "id_db_qst": "Y1UEGY_q13_2",
-          "id": "q13_2",
-           "label": "Visites de musées, monuments" ,
-           "cells": {
-            "R1": { "enabled": false },
-            "R2": { "enabled": true}
-          }
-          },
-          { "id_db_qst": "Y1UEGY_q13_3",
-          "id": "q13_3",
-           "label": "Parcs, jardins, sites naturels",
-          "cells": {
-            "R1": { "enabled": true },
-            "R2": { "enabled": false }
-          } },
-          { "id_db_qst": "Y1UEGY_q13_4", 
-          "id": "q13_4", 
-          "label": "Visites guidées de quartiers" ,
-        "cells": {
-            "R1": { "enabled": false },
-            "R2": { "enabled": true }
-          }}
-        ],
-      
-        "reponses": [
-          {"id_db_rps":"Y1UEGY_R1",
-            "id": "R1",
-            "label": "Activités pratiquées",
-            "input": {
-              "type": "checkbox",
-              "axis": "column",
-              "required": false
-            }
-          },
-          {"id_db_rps":"Y1UEGY_R2",
-            "id": "R2",
-            "label": "Motivation principale du séjour",
-            "input": {
-              "type": "radio",
-              "axis": "column",
-              "required": true
-              
-            }
-          }
-        ]
-      }, 
-      {
-        "id_db": "Y1U3FY",
-        "id": "q15",
-        "type": "grid",
-        "title": "Q15.",
-        "page": 11,
-        "label": "Activités pratiquées et motivation principale du séjour",
-        "required": true,
-        "redirection": "q2",
-        "questions": [
-          { "id_db_qst": "Y1U3FY_q15_1", "id": "q15_1", "label": "Se promener, flâner","required": true },
-          { "id_db_qst": "Y1U3FY_q15_2","id": "q15_2", "label": "Visites de musées, monuments" ,"required": true},
-          { "id_db_qst": "Y1U3FY_q15_3","id": "q15_3", "label": "Parcs, jardins, sites naturels","required": false },
-          { "id_db_qst": "Y1U3FY_q15_4","id": "q15_4", "label": "Visites guidées de quartiers","required": true }
-        ],
-      
-        "reponses": [
-          {"id_db_rps":"Y1U3FY_R1",
-            "id": "R1",
-            "label": "rarely",
-            "input": {
-              "type": "checkbox",
-              "axis": "row",
-              "validation": {
-                "min": 1
-              }
-            }
-          },
-          {"id_db_rps":"Y1U3FY_R2",
-            "id": "R2",
-            "label": "never",
-            "input": {
-              "type": "checkbox",
-              "axis": "row",
-              "validation": {
-                "required": true,
-                "max": 1
-              }
-            }
-          }
-        ]
-      }, 
-      
-
-      {
-        "id": "q6",
-        "title": "Q6bis.",
-        "type": "text",
-        "page": 111,
-        "label": "Quel est votre moyen de transport principal  bus?",
-        "placeholder": "uu",
-        "help_text": "Indiquez le moyen que vous utilisez le plus souvent",
-        "input_cond": "",
-        "output_cond": "value.length > 0",
-        "required": true,
-        "redirection": "q4",
-        "isSubQuestion": true,
-        "id_db": "8KTVIW"
-      },
-      {
-        "id": "q8",
-        "title": "Q8bis.",
-        "type": "multiple_choice",
-        "label": "Quels transports utilisez-vous ?",
-        "page": 111,
-        "options": [
-          {
-            "codeItem": 1,
-            "label": "Bus"
-          },
-          {
-            "codeItem": 2,
-            "label": "Train",
-            "requiresPrecision": true
-          },
-          {
-            "codeItem": 3,
-            "label": "Voiture"
-          },
-          {
-            "codeItem": 6,
-            "label": "Aucun",
-            "exclusive": true
-          }
-        ],
-        "redirection": "q3",
-        "required": true,
-        "output_cond": "value.length > 0",
-        "isSubQuestion": false,
-        "id_db": "KO3HT8"
-      },
-      
-      {"id_db": "KO6HT8",
-        "id": "q24",
-        "type": "single_choice",
-        "label": "Fréquence d’utilisation du transport en commun",
-        "redirection": "q8",
-        "required": true,
-        "options": [
-          {
-            "codeItem": 1,
-            "label": "Tous les jours",
-            "subQuestions": [
-              {"id_db": "GO3A5U",
-                "id": "q24_1",
-                "type": "spinner",
-                "label": "  sub SPINNER qst?",
-                "options": [
-          {
-            "codeItem": 1,
-            "label": "SP A"
-          },
-          {
-            "codeItem": 2,
-            "label": " SP B",
-            "requiresPrecision": true
-          },
-          {
-            "codeItem": 3,
-            "label": "SB C"
-          }
-        ]
-              }
-            ]
-          },
-          {
-            "codeItem": 2,
-            "label": "Quelques fois par semaine",
-            "subQuestions": [
-              {"id_db": "KO3A5U",
-                "id": "q24_77",
-                "type": "single_choice",
-                "label": "  sub qst?",
-                "options": [
-          {
-            "codeItem": 4,
-            "label": "A"
-          },
-          {
-            "codeItem": 8,
-            "label": " S",
-            "requiresPrecision": true
-          },
-          {
-            "codeItem": 11,
-            "label": "z S"
-          }
-        ]
-              }
-            ]
-          },
-          {
-            "codeItem": 7,
-            "label": "Autre",
-            "subQuestions": [
-              {"id_db": "KO3T8U",
-                "id": "q24_7",
-                "type": "multiple_choice",
-                "label": "Quels transports utilisez-vous  sub qst?",
-                "options": [
-          {
-            "codeItem": 1,
-            "label": "BusS"
-          },
-          {
-            "codeItem": 2,
-            "label": "Train S",
-            "requiresPrecision": true
-          },
-          {
-            "codeItem": 3,
-            "label": "Voiture S"
-          },
-          {
-            "codeItem": 6,
-            "label": "Aucun S",
-            "exclusive": true
-          }
-        ]
-              }
-            ]
-          }
-        ]
+{
+  "id_db": "Y1UEG9",
+  "id": "q14",
+  "type": "grid",
+  "title": "Q14.",
+  "label": "Activités pratiquées et motivation principale du séjour",
+  "required": true,
+  "redirection": "q13",
+  "page": 9,
+  "questions": [
+    { "id_db_qst": "Y1UEG9_q14_1",
+    "id": "q14_1",
+    "label": "Se promener, flâner",
+    "required": true,
+    "cells": {
+      "R1": { "enabled": true },
+      "R2": { "enabled": true }
+    }
+  },
+  { "id_db_qst": "Y1UEG9_q14_2",
+  "id": "q14_2", 
+  "label": "Visites de musées, monuments" ,
+  "required": false,
+  "cells": {
+    "R1": { "enabled": true },
+    "R2": { "enabled": false }
+    }},
+    { "id_db_qst": "Y1UEG9_q14_3",
+    "id": "q14_3",
+    "label": "Parcs, jardins, sites naturels",
+    "required": true,
+    "cells": {
+      "R1": { "enabled": true },
+      "R2": { "enabled": true }
+      } }
+    ],
+    
+    "reponses": [
+      {"id_db_rps":"Y1UEG9_R1",
+      "id": "R1",
+      "label": "oui",
+      "input": {
+        "type": "radio",
+        "axis": "row",
+        "validation": {
+          "min": 1
+        }
       }
+    },
+    {
+      "id_db_rps":"Y1UEG9_R2",
+      "id": "R2",
+      "label": "non",
+      "input": {
+        "type": "radio",
+        "axis": "row",
+        "validation": {
+          "required": true,
+          "min": 1
+        }
+      }
+    }
+  ]
+}, 
+{
+  "id_db": "Y1UEGY",
+  "id": "q13",
+  "type": "grid",
+  "title": "Q13.",
+  "page":10,
+  "label": "Activités pratiquées et motivation principale du séjour",
+  "required": true,
+  "redirection": "q15",
+  "questions": [
+    { "id_db_qst": "Y1UEGY_q13_1",
+    "id": "q13_1", "label": "Se promener, flâner" },
+    { "id_db_qst": "Y1UEGY_q13_2",
+    "id": "q13_2",
+    "label": "Visites de musées, monuments" ,
+    "cells": {
+      "R1": { "enabled": false },
+      "R2": { "enabled": true}
+    }
+  },
+  { "id_db_qst": "Y1UEGY_q13_3",
+  "id": "q13_3",
+  "label": "Parcs, jardins, sites naturels",
+  "cells": {
+    "R1": { "enabled": true },
+    "R2": { "enabled": false }
+    } },
+    { "id_db_qst": "Y1UEGY_q13_4", 
+    "id": "q13_4", 
+    "label": "Visites guidées de quartiers" ,
+    "cells": {
+      "R1": { "enabled": false },
+      "R2": { "enabled": true }
+      }}
+    ],
+    
+    "reponses": [
+      {"id_db_rps":"Y1UEGY_R1",
+      "id": "R1",
+      "label": "Activités pratiquées",
+      "input": {
+        "type": "checkbox",
+        "axis": "column",
+        "required": false
+      }
+    },
+    {"id_db_rps":"Y1UEGY_R2",
+    "id": "R2",
+    "label": "Motivation principale du séjour",
+    "input": {
+      "type": "radio",
+      "axis": "column",
+      "required": true
       
+    }
+  }
+]
+}, 
+{
+  "id_db": "Y1U3FY",
+  "id": "q15",
+  "type": "grid",
+  "title": "Q15.",
+  "page": 11,
+  "label": "Activités pratiquées et motivation principale du séjour",
+  "required": true,
+  "redirection": "q2",
+  "questions": [
+    { "id_db_qst": "Y1U3FY_q15_1", "id": "q15_1", "label": "Se promener, flâner","required": true },
+    { "id_db_qst": "Y1U3FY_q15_2","id": "q15_2", "label": "Visites de musées, monuments" ,"required": true},
+    { "id_db_qst": "Y1U3FY_q15_3","id": "q15_3", "label": "Parcs, jardins, sites naturels","required": false },
+    { "id_db_qst": "Y1U3FY_q15_4","id": "q15_4", "label": "Visites guidées de quartiers","required": true }
+  ],
+  
+  "reponses": [
+    {"id_db_rps":"Y1U3FY_R1",
+    "id": "R1",
+    "label": "rarely",
+    "input": {
+      "type": "checkbox",
+      "axis": "row",
+      "validation": {
+        "min": 1
+      }
+    }
+  },
+  {"id_db_rps":"Y1U3FY_R2",
+  "id": "R2",
+  "label": "never",
+  "input": {
+    "type": "checkbox",
+    "axis": "row",
+    "validation": {
+      "required": true,
+      "max": 1
+    }
+  }
+}
+]
+}, 
+
+
+{
+  "id": "q6",
+  "title": "Q6bis.",
+  "type": "text",
+  "page": 111,
+  "label": "Quel est votre moyen de transport principal  bus?",
+  "placeholder": "uu",
+  "help_text": "Indiquez le moyen que vous utilisez le plus souvent",
+  "input_cond": "",
+  "output_cond": "value.length > 0",
+  "required": true,
+  "redirection": "q4",
+  "isSubQuestion": true,
+  "id_db": "8KTVIW"
+},
+{
+  "id": "q8",
+  "title": "Q8bis.",
+  "type": "multiple_choice",
+  "label": "Quels transports utilisez-vous ?",
+  "page": 111,
+  "options": [
+    {
+      "codeItem": 1,
+      "label": "Bus"
+    },
+    {
+      "codeItem": 2,
+      "label": "Train",
+      "requiresPrecision": true
+    },
+    {
+      "codeItem": 3,
+      "label": "Voiture"
+    },
+    {
+      "codeItem": 6,
+      "label": "Aucun",
+      "exclusive": true
+    }
+  ],
+  "redirection": "q3",
+  "required": true,
+  "output_cond": "value.length > 0",
+  "isSubQuestion": false,
+  "id_db": "KO3HT8"
+},
+
+{"id_db": "KO6HT8",
+"id": "q24",
+"type": "single_choice",
+"label": "Fréquence d’utilisation du transport en commun",
+"redirection": "q8",
+"required": true,
+"options": [
+  {
+    "codeItem": 1,
+    "label": "Tous les jours",
+    "subQuestions": [
+      {"id_db": "GO3A5U",
+      "id": "q24_1",
+      "type": "spinner",
+      "label": "  sub SPINNER qst?",
+      "options": [
+        {
+          "codeItem": 1,
+          "label": "SP A"
+        },
+        {
+          "codeItem": 2,
+          "label": " SP B",
+          "requiresPrecision": true
+        },
+        {
+          "codeItem": 3,
+          "label": "SB C"
+        }
+      ]
+    }
+  ]
+},
+{
+  "codeItem": 2,
+  "label": "Quelques fois par semaine",
+  "subQuestions": [
+    {"id_db": "KO3A5U",
+    "id": "q24_77",
+    "type": "single_choice",
+    "label": "  sub qst?",
+    "options": [
+      {
+        "codeItem": 4,
+        "label": "A"
+      },
+      {
+        "codeItem": 8,
+        "label": " S",
+        "requiresPrecision": true
+      },
+      {
+        "codeItem": 11,
+        "label": "z S"
+      }
     ]
   }
+]
+},
+{
+  "codeItem": 7,
+  "label": "Autre",
+  "subQuestions": [
+    {"id_db": "KO3T8U",
+    "id": "q24_7",
+    "type": "multiple_choice",
+    "label": "Quels transports utilisez-vous  sub qst?",
+    "options": [
+      {
+        "codeItem": 1,
+        "label": "BusS"
+      },
+      {
+        "codeItem": 2,
+        "label": "Train S",
+        "requiresPrecision": true
+      },
+      {
+        "codeItem": 3,
+        "label": "Voiture S"
+      },
+      {
+        "codeItem": 6,
+        "label": "Aucun S",
+        "exclusive": true
+      }
+    ]
+  }
+]
+}
+]
+}
+
+]
+}

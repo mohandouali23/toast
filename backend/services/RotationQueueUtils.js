@@ -1,54 +1,54 @@
 
 export default class RotationQueueUtils {
-    
- 
+  
+  
   static generateRotationQueue(survey, mainQuestionId, answers) {
     const mainStep = survey.steps.find(s => s.id === mainQuestionId);
     if (!mainStep) return [];
-
+    
     const selectedOptions = answers[mainQuestionId];
     if (!selectedOptions) return [];
-
+    
     // Si c'est multiple_choice, transformer en array
     const selectedArray = Array.isArray(selectedOptions)
     ? selectedOptions.map(Number)
     : selectedOptions.toString().split('/').map(Number);
-  
-      //console.log("selected",selectedArray)
-
-      /* ==========================================
-     1 Vérifier option exclusive
-     ========================================== */
-  const hasExclusive = selectedArray.some(code => {
-   // console.log("code",code)
-    const opt = mainStep.options.find(o => o.codeItem === code);
-    //console.log("opt",opt)
-    return opt?.exclusive === true;
-  });
- // console.log("exclusive",hasExclusive)
-  if (hasExclusive) {
-    //console.log(' Option exclusive détectée → pas de rotation');
-    return [];
-  }
-
+    
+    //console.log("selected",selectedArray)
+    
+    /* ==========================================
+    1 Vérifier option exclusive
+    ========================================== */
+    const hasExclusive = selectedArray.some(code => {
+      // console.log("code",code)
+      const opt = mainStep.options.find(o => o.codeItem === code);
+      //console.log("opt",opt)
+      return opt?.exclusive === true;
+    });
+    // console.log("exclusive",hasExclusive)
+    if (hasExclusive) {
+      //console.log(' Option exclusive détectée → pas de rotation');
+      return [];
+    }
+    
     const rotationQueue = [];
-
+    
     // Récupérer toutes les sous-questions qui dépendent de la question principale
     const subSteps = survey.steps.filter(s => s.repeatFor === mainQuestionId);
-
+    
     // Pour chaque option sélectionnée dans la principale
     selectedArray.forEach((optionCode, index) => {
       const optionObj = mainStep.options.find(o => o.codeItem === optionCode);
-
+      
       if (!optionObj) return;
-
+      
       subSteps.forEach(subStep => {
-         //  Cloner la step pour ne pas écraser l’original
-      const stepClone = { ...subStep };
-
-      //  Remplacer TRANSPORT par le label réel
-      stepClone.label = stepClone.label.replace("TRANSPORT", optionObj.label);
-
+        //  Cloner la step pour ne pas écraser l’original
+        const stepClone = { ...subStep };
+        
+        //  Remplacer TRANSPORT par le label réel
+        stepClone.label = stepClone.label.replace("TRANSPORT", optionObj.label);
+        
         // Copier la step et ajouter contexte
         rotationQueue.push({
           id: subStep.id,
@@ -60,7 +60,7 @@ export default class RotationQueueUtils {
         });
       });
     });
-
+    
     return rotationQueue;
   }
   //  Fonction pour prev sur rotation
@@ -68,7 +68,7 @@ export default class RotationQueueUtils {
     if (!session.rotationQueue) return null;
     return session.rotationQueue.find(wrapper => wrapper.step.id === stepId) || null;
   }
-// NOUVELLE FONCTION MANQUANTE
+  // NOUVELLE FONCTION MANQUANTE
   static getAllRotationsForParent(session, parentId) {
     if (!session.surveyCache) {
       console.warn('surveyCache non disponible dans la session');
@@ -96,10 +96,9 @@ export default class RotationQueueUtils {
   static getRotationQueueFromHistory(session, parentId) {
     // Récupérer toutes les rotations pour ce parent depuis l'history
     const rotationHistory = session.history
-      .filter(h => h.isRotation && h.wrapper?.parent === parentId)
-      .map(h => h.wrapper);
+    .filter(h => h.isRotation && h.wrapper?.parent === parentId)
+    .map(h => h.wrapper);
     
     return rotationHistory;
   }
-  }
-  
+}
