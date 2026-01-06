@@ -14,6 +14,7 @@ export default class SurveyRunService {
     const survey = SurveyService.loadSurvey(surveyId);
     // Stocker le survey dans le cache de session pour utilisation ultérieure
   session.surveyCache = survey;
+
     this.initSession(session);
     
     const responseId = await this.ensureResponse(surveyId, session, userId);
@@ -77,6 +78,7 @@ export default class SurveyRunService {
     // }
     static getStepsForCurrentPage(survey, currentStep, isInRotation) {
       if (!currentStep) return []; // éviter TypeError
+ 
       return isInRotation
       ? [currentStep]
       : survey.steps.filter(s => s.page === currentStep.page);
@@ -234,69 +236,134 @@ export default class SurveyRunService {
         wrapper: isRotation ? wrapper : null });
       }
       
-  static handlePrevious(session) {
+
+      static handlePrevious(session) {
   console.log('⬅️ PREV CLIQUÉ');
   console.log('📜 history:', session.history.map(h => h.id));
   console.log('📦 rotationQueue:', session.rotationQueue?.map(w => w.id));
   console.log('📍 currentStepId:', session.currentStepId);
-  
+
   if (!session.currentStepId) return null;
-  
-  // Cas 1: On est dans une rotation
+
+  // -------------------- CAS 1 : déjà dans une rotation --------------------
   if (session.rotationQueue?.length) {
     const currentWrapper = session.rotationQueue[0];
     const parentId = currentWrapper.parent;
-    
-    // Chercher la rotation précédente dans l'history
+
     const rotationHistory = session.history
       .filter(h => h.isRotation && h.wrapper?.parent === parentId)
       .map(h => h.id);
-    
-    console.log('🔄 rotationHistory pour parent', parentId, ':', rotationHistory);
-    
-    // Si on n'est pas la première rotation de cette série
+
     if (rotationHistory.length > 0) {
-      // Retourner à la dernière rotation de l'history
-      const previousRotationId = rotationHistory[rotationHistory.length - 1];
-      
-      // Reconstruire la rotationQueue en partant de la rotation précédente
-      const allRotations = RotationQueueUtils.getAllRotationsForParent(session, parentId);
-      const currentIndex = allRotations.findIndex(r => r.id === currentWrapper.id);
-      
+      const allRotations =
+        RotationQueueUtils.getAllRotationsForParent(session, parentId);
+
+      const currentIndex =
+        allRotations.findIndex(r => r.id === currentWrapper.id);
+
       if (currentIndex > 0) {
         session.rotationQueue = allRotations.slice(currentIndex - 1);
         session.currentStepId = session.rotationQueue[0].step.id;
         return session.currentStepId;
       }
     }
-    
-    // Sinon, retourner au parent
+
+    // retour au parent
     delete session.rotationQueue;
     session.currentStepId = parentId;
     return parentId;
   }
-  
-  // Cas 2: Pas dans une rotation, utiliser l'history
+
+  // -------------------- CAS 2 : hors rotation --------------------
   if (!session.history?.length) return null;
-  
-  // Retirer l'étape actuelle si elle est à la fin
+
   const lastHistory = session.history[session.history.length - 1];
   if (lastHistory.id === session.currentStepId) {
     session.history.pop();
   }
-  
+
   if (!session.history.length) return null;
-  
+
   const previousStep = session.history[session.history.length - 1];
+
+  // ✅ AJOUT CRITIQUE ICI (sans changer la logique)
+  if (previousStep.isRotation && previousStep.wrapper) {
+    const parentId = previousStep.wrapper.parent;
+
+    const allRotations =
+      RotationQueueUtils.getAllRotationsForParent(session, parentId);
+
+    const index = allRotations.findIndex(r => r.id === previousStep.id);
+
+    session.rotationQueue =
+      index >= 0 ? allRotations.slice(index) : allRotations;
+  } else {
+    delete session.rotationQueue;
+  }
+
   session.currentStepId = previousStep.id;
   return previousStep.id;
 }
+
+//   static handlePrevious(session) {
+//   console.log('⬅️ PREV CLIQUÉ');
+//   console.log('📜 history:', session.history.map(h => h.id));
+//   console.log('📦 rotationQueue:', session.rotationQueue?.map(w => w.id));
+//   console.log('📍 currentStepId:', session.currentStepId);
+  
+//   if (!session.currentStepId) return null;
+  
+//   // Cas 1: On est dans une rotation
+//   if (session.rotationQueue?.length) {
+//     const currentWrapper = session.rotationQueue[0];
+//     const parentId = currentWrapper.parent;
+    
+//     // Chercher la rotation précédente dans l'history
+//     const rotationHistory = session.history
+//       .filter(h => h.isRotation && h.wrapper?.parent === parentId)
+//       .map(h => h.id);
+    
+//     console.log('🔄 rotationHistory pour parent', parentId, ':', rotationHistory);
+    
+//     // Si on n'est pas la première rotation de cette série
+//     if (rotationHistory.length > 0) {
+//       // Retourner à la dernière rotation de l'history
+//       const previousRotationId = rotationHistory[rotationHistory.length - 1];
       
+//       // Reconstruire la rotationQueue en partant de la rotation précédente
+//       const allRotations = RotationQueueUtils.getAllRotationsForParent(session, parentId);
+//       const currentIndex = allRotations.findIndex(r => r.id === currentWrapper.id);
       
+//       if (currentIndex > 0) {
+//         session.rotationQueue = allRotations.slice(currentIndex - 1);
+//         session.currentStepId = session.rotationQueue[0].step.id;
+//         return session.currentStepId;
+//       }
+//     }
+    
+//     // Sinon, retourner au parent
+//     delete session.rotationQueue;
+//     session.currentStepId = parentId;
+//     return parentId;
+//   }
+  
+//   // Cas 2: Pas dans une rotation, utiliser l'history
+//   if (!session.history?.length) return null;
+  
+//   // Retirer l'étape actuelle si elle est à la fin
+//   const lastHistory = session.history[session.history.length - 1];
+//   if (lastHistory.id === session.currentStepId) {
+//     session.history.pop();
+//   }
+  
+//   if (!session.history.length) return null;
+  
+//   const previousStep = session.history[session.history.length - 1];
+//   session.currentStepId = previousStep.id;
+//   return previousStep.id;
+// }
       
-      
-      
-      
+       
       
       
       // static handlePrevious(session) {
