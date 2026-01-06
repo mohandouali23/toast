@@ -90,7 +90,6 @@ session.history.push({
         nextStepId: session.rotationQueue[0].step.id
       };
     }
-
     // fin rotation
     delete session.rotationQueue;
 

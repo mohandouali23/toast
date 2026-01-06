@@ -45,6 +45,15 @@ export default class SurveyRunService {
     if (!nextStepId || nextStepId === 'FIN') return { finished: true };
 
     session.currentStepId = nextStepId;
+    console.log("session",session)
+    console.log('🧭 QUESTION AFFICHÉE');
+console.log('➡️ currentStepId:', nextStepId);
+console.log('📜 history (ordre):', session.history.map(h => ({
+  id: h.id,
+  isRotation: h.isRotation,
+  parent: h.wrapper?.parent
+})));
+
     return { nextStep: { id: nextStepId } };
   }
 
@@ -225,32 +234,40 @@ export default class SurveyRunService {
   }
 
   static handlePrevious(session) {
+    console.log('⬅️ PREV CLIQUÉ');
+console.log('📜 history AVANT pop:', session.history.map(h => h.id));
+console.log('📦 rotationQueue AVANT:', session.rotationQueue?.map(w => w.id));
     if (!session.history?.length) return null;
     const lastStep = session.history.pop();
     if (!lastStep) return null;
 
-    // if (lastStep.isRotation) {
-    //   const stepWrapper = RotationQueueUtils.getStepWrapperById(session, lastStep.id);
-    //   session.rotationQueue = [stepWrapper, ...(session.rotationQueue || [])];
-    // }
-    console.log("lastStep ",lastStep )
-    console.log("lastStep.wrapper",lastStep.wrapper)
-    console.log("lastStep.isRotation ",lastStep.isRotation )
-   // cas rotation
-   if (lastStep.isRotation && lastStep.wrapper) {
-    const parentId = lastStep.wrapper.parent;
+    console.log('📜 history APRÈS pop:', session.history.map(h => h.id));
 
-    // remettre la wrapper complet dans rotationQueue
-    session.rotationQueue = [lastStep.wrapper, ...(session.rotationQueue || [])];
+if (lastStep.isRotation && lastStep.wrapper) {
+  const parentId = lastStep.wrapper.parent;
 
-    // si on revient à la question principale, on supprime la rotation
-    if (session.answers[parentId] !== undefined) {
-        delete session.rotationQueue;
-    }
+  // 🔍 vérifier s'il reste une autre rotation du même parent dans l'history
+  const hasPreviousRotation = session.history.some(
+    h => h.isRotation && h.wrapper?.parent === parentId
+  );
 
-    session.currentStepId = parentId;
-    return parentId;
+  if (hasPreviousRotation) {
+    // 🔁 cas 1 : retour vers rotation précédente
+    session.rotationQueue = [
+      lastStep.wrapper,
+      ...(session.rotationQueue || [])
+    ];
+
+    session.currentStepId = lastStep.id;
+    return lastStep.id;
+  }
+
+  // ⬅️ cas 2 : on était sur la 1ère rotation → retour au parent
+  delete session.rotationQueue;
+  session.currentStepId = parentId;
+  return parentId;
 }
+
     session.currentStepId = lastStep.id;
     return lastStep.id;
   }

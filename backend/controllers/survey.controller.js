@@ -56,7 +56,7 @@ export const runSurveyPage = (req, res) => {
   const stepsOnPage = getStepsForPage(req, survey, currentPage);
 
   const options = [];
-  const preparedSteps = prepareSteps(stepsOnPage, req.session.answers, options);
+  const preparedSteps = prepareSteps(stepsOnPage, req.session.answers, options,req.session.rotationQueue || []);
   renderSurveyPage(res, survey, currentPage, preparedSteps, options);
 };
 
@@ -87,8 +87,26 @@ function getStepsForPage(req, survey, page) {
 }
 
 // Préparer chaque step : grid, autocomplete, accordion + pré-remplissage
-function prepareSteps(steps, sessionAnswers, options) {
+function prepareSteps(steps, sessionAnswers, options, rotationQueue = []) {
   return steps.map(step => {
+
+    const rotationItem = rotationQueue.find(r => r.step.id === step.id);
+    if (rotationItem) {
+      step.wrapper = {
+        id: rotationItem.id,
+        parent: rotationItem.parent,
+        optionCode: rotationItem.optionCode,
+        optionIndex: rotationItem.optionIndex,
+        optionLabel: rotationItem.optionLabel
+      };
+  //step.wrapper = rotationItem;
+  console.log('  step.wrapper = rotationItem',rotationItem)
+  // Assurer que optionIndex est défini
+  if (step.wrapper.optionIndex === undefined && step.wrapper.optionCode !== undefined) {
+    step.wrapper.optionIndex = step.wrapper.optionCode;
+  }
+}
+
     // Préparer selon le type
    // if (step.type === 'grid') step = SurveyService.prepareGridB(step);
    if (step.type === 'grid') {
@@ -99,7 +117,10 @@ function prepareSteps(steps, sessionAnswers, options) {
     if (step.type === 'accordion') prepareAccordion(step);
 
     prefillStep(step, sessionAnswers);
-
+// ---- Rotation : si step a un wrapper (dans rotation) ----
+if (step.wrapper) {
+  prefillRotationStep(step, sessionAnswers);
+}
     return SurveyService.prepareStepForPage(step);
   });
 }
@@ -116,6 +137,19 @@ function prepareAccordion(step) {
 function prefillStep(step, sessionAnswers) {
   if (typeof AnswerPrefillUtils[step.type] === 'function') {
     AnswerPrefillUtils[step.type](step, sessionAnswers);
+  }
+}
+function prefillRotationStep(step, sessionAnswers) {
+ if (!step.wrapper) return;
+ const indexOrCode = step.wrapper.optionIndex ?? step.wrapper.optionCode;
+ const rotationKey = `${step.id}_${indexOrCode}`; // ex: q3_2_1
+  if (typeof AnswerPrefillUtils[step.type] === 'function') {
+    // Appeler le pré-remplissage comme pour une question normale
+    AnswerPrefillUtils[step.type](step, sessionAnswers, rotationKey);
+  }
+  // Copier éventuellement les réponses existantes dans la session
+  if (sessionAnswers[rotationKey] !== undefined) {
+    step.prefilledValue = sessionAnswers[rotationKey];
   }
 }
 

@@ -37,12 +37,16 @@ export default class AnswerPrefillUtils {
   }
 
   // ---------------- Text / Spinner ----------------
-  static text(step, sessionAnswers) {
-    step.value = sessionAnswers[step.id] || '';
+  static text(step, sessionAnswers,keyOverride) {
+    const key = keyOverride || step.id;
+    console.log("key",key)
+    step.value = sessionAnswers[key] || '';
+
   }
 
-  static spinner(step, sessionAnswers) {
-    step.value = sessionAnswers[step.id] || '';
+  static spinner(step, sessionAnswers,keyOverride) {
+    const key = keyOverride || step.id;
+    step.value = sessionAnswers[key] || '';
     if (Array.isArray(step.options)) {
       step.options.forEach(opt => {
         opt.isSelected = step.value === opt.codeItem.toString();
@@ -51,10 +55,12 @@ export default class AnswerPrefillUtils {
   }
 
   // ---------------- Single Choice ----------------
-  static single_choice(step, sessionAnswers) {
-    const stored = sessionAnswers[step.id] || sessionAnswers[step.id_db];
-    const values = typeof stored === 'object' ? stored : { [step.id]: stored };
-    const selectedValue = values[step.id];
+  static single_choice(step, sessionAnswers,keyOverride) {
+    const key = keyOverride || step.id;
+    const stored = sessionAnswers[key] || sessionAnswers[step.id_db];
+   //  const stored = sessionAnswers[step.id] || sessionAnswers[step.id_db];
+    const values = typeof stored === 'object' ? stored : { [key]: stored };
+    const selectedValue = values[key];
 
     step.options.forEach(opt => {
       const optValue = opt.codeItem.toString();
@@ -72,13 +78,14 @@ export default class AnswerPrefillUtils {
       }
 
       // Précision
-      this.fillPrecision(opt, step.id, sessionAnswers);
+      this.fillPrecision(opt, key, sessionAnswers);
     });
   }
 
   // ---------------- Multiple Choice ----------------
-  static multiple_choice(step, sessionAnswers) {
-    const saved = sessionAnswers[step.id];
+  static multiple_choice(step, sessionAnswers,keyOverride) {
+    const key = keyOverride || step.id;
+    const saved = sessionAnswers[key];
     if (!saved) {
       step.options.forEach(opt => {
         opt.isSelected = false;
@@ -93,13 +100,14 @@ export default class AnswerPrefillUtils {
 
     step.options.forEach(opt => {
       this.fillSelected(opt, savedStrings);
-      this.fillPrecision(opt, step.id, sessionAnswers);
+      this.fillPrecision(opt, key, sessionAnswers);
     });
   }
 
   // ---------------- Autocomplete ----------------
-  static autocomplete(step, sessionAnswers) {
-    const saved = sessionAnswers[step.id];
+  static autocomplete(step, sessionAnswers,keyOverride) {
+    const key = keyOverride || step.id;
+    const saved = sessionAnswers[key];
     if (!saved) {
       step.value = '';
       step.displayValue = '';
@@ -123,7 +131,8 @@ export default class AnswerPrefillUtils {
 
   // ---------------- Accordion ----------------
   static accordion(step, sessionAnswers) {
-    const saved = sessionAnswers[step.id];
+    const key = keyOverride || step.id;
+    const saved = sessionAnswers[key];
     if (!saved) return;
 
     const prefillQuestion = (q, sectionId) => {
@@ -156,8 +165,9 @@ export default class AnswerPrefillUtils {
   }
 
   // ---------------- Grid ----------------
-  static grid(step, sessionAnswers) {
-    const savedWrapper = sessionAnswers[step.id];
+  static grid(step, sessionAnswers,keyOverride) {
+    const key = keyOverride || step.id;
+    const savedWrapper = sessionAnswers[key];
     if (!savedWrapper || !savedWrapper.value) return;
     const saved = savedWrapper.value;
 
