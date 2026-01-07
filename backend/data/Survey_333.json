@@ -14,7 +14,7 @@
       "label": "Quel est votre moyen de transport principal ttt ?",
       "placeholder": "Ex : Bus, Train, Voiture...",
       "help_text": "Indiquez le moyen que vous utilisez le plus souvent",
-      "redirection": "q25",
+      "redirection": "q3",
       "input_cond": "",
       "output_cond": "value.length > 0",
       "required": true,
@@ -68,7 +68,7 @@
             "if": {
               "operator": "EQUALS",
               "field": "codeItem",
-              "value": 5
+              "value": "6"
             },
             "then": {
               "goTo": "q6"
@@ -228,7 +228,20 @@
     "input_cond": "",
     "output_cond": "value !== null",
     "required": true,
-    "isSubQuestion": false
+    "isSubQuestion": false,
+    "navigation": {
+      "rules": [
+        {
+          "if": {
+            "operator": "IN",
+            "field": "_id",
+            "values": [1, 2]
+          },
+          "then": { "goTo": "q6" }
+        }
+      ],
+      "default": "redirection"
+    }
     
   },
   {
@@ -260,8 +273,16 @@
     "placeholder": "Sélectionnez une option",
     "required": true,
     "redirection": "q16",
-    "isSubQuestion": false
-    
+    "isSubQuestion": false,
+    "navigation": {
+      "rules": [
+        {
+          "if": { "operator": "IN",   "field": "codeItem","values": ["1", "3"] },
+          "then": { "goTo": "q6" }
+        }
+      ],
+      "default": "redirection"
+    }    
     
   },
   {
@@ -301,17 +322,17 @@
 "id_sect": "q16_sect2",
 "title": "Pays U.E",
 "questions": [
-  {"id_db": "A2M7LP",
-  "id": "q10_3",
-  "type": "multiple_choice",
-  "label": "",
-  "required": true,
-  "options": [
-    { "codeItem": 1,  "label": "France"},
-    { "codeItem": 2, "label": "Allemagne"},
-    { "codeItem": 3, "label": "Royaume-Uni"},
-    { "codeItem": 4,  "label": "Belgique"}
-  ]
+{"id_db": "A2M7LP",
+"id": "q10_3",
+"type": "multiple_choice",
+"label": "",
+"required": true,
+"options": [
+  { "codeItem": 1,  "label": "France"},
+  { "codeItem": 2, "label": "Allemagne"},
+  { "codeItem": 3, "label": "Royaume-Uni"},
+  { "codeItem": 4,  "label": "Belgique"}
+]
 }
 ]
 }
@@ -729,8 +750,23 @@
 "page":42,
 "type": "multiple_choice",
 "label": "transport en commun",
-"redirection": "q24",
+"redirection": "q4",
 "required": true,
+"navigation": {
+"rules": [
+  {
+    "if": {
+      "operator": "EQUALS",
+      "field": "codeItem",
+      "value": "1"
+    },
+    "then": {
+      "goTo": "q6"
+    }
+  }
+],
+"default": "redirection"
+},
 "options": [
 {
   "codeItem": 1,
@@ -774,7 +810,7 @@
     "type": "multiple_choice",
     "label": "Quels transports utilisez-vous  sub qst?",
     "required": false,
-
+    
     "options": [
       {
         "codeItem": 1,
