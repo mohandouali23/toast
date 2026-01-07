@@ -1,15 +1,19 @@
 export default class NavigationRuleService {
-  
+    //  Évalue un opérateur simple sur une réponse
+
   static evaluateRule(rule, answerValue) {
-    
     const extracted = this.extractValue(answerValue, rule.field);
+       const values = Array.isArray(extracted) ? extracted : [extracted];
+
     console.log("NAV DEBUG", {
-      answerValue,
-      extracted,
-      rule
-    });
+  answerValue,
+  extracted,
+  rule,
+  values
+});
+
     
-    const values = Array.isArray(extracted) ? extracted : [extracted];
+   // const values = Array.isArray(extracted) ? extracted : [extracted];
     switch (rule.operator) {
       case 'EQUALS':
       return values.some(v => String(v) === String(rule.value));
@@ -48,43 +52,188 @@ export default class NavigationRuleService {
       return false;
     }
   }
-  
-  /**
-  * Résout la navigation pour une question donnée
-  */
-  static resolve(step, answerValue, steps) {
-    
-    const navigation = step.navigation;
-    
-    //  Règles conditionnelles
-    if (navigation?.rules?.length) {
-      for (const rule of navigation.rules) {
-        const match = this.evaluateRule(rule.if, answerValue);
-        if (match) {
-          return rule.then.goTo;
-        }
+  //  Évaluer plusieurs conditions AND sur plusieurs questions
+ static evaluateConditions(conditions, sessionAnswers, stepId) {
+  console.log("evaluateCondition DEBUG", {
+    conditions,
+    stepId,
+    sessionAnswers
+  });
+
+  const accordionAnswers = sessionAnswers[stepId] || {};
+
+  return conditions.every(cond => {
+    const answerValue = accordionAnswers[cond.questionId];
+    return this.evaluateRule(cond, answerValue);
+  });
+}
+
+  //  Résout la navigation d'une étape (accordion ou simple question)
+ static resolve(step, sessionAnswers, steps) {
+  console.log("resolveDEBUG", { step, sessionAnswers });
+
+  const navigation = step.navigation;
+
+  if (navigation?.rules?.length) {
+    for (const rule of navigation.rules) {
+      let match = false;
+
+      // ✅ 1. GRID
+      if (rule.if?.type === 'GRID') {
+        match = this.evaluateGridRule(rule.if, sessionAnswers[step.id]);
+        console.log("GRID match", match);
       }
-      
+
+      // ✅ 2. MULTI-CONDITIONS (accordion, etc.)
+      else if (rule.if?.conditions) {
+        match = this.evaluateConditions(
+          rule.if.conditions,
+          sessionAnswers,
+          step.id
+        );
+        console.log("CONDITIONS match", match);
+      }
+
+      // ✅ 3. SIMPLE RULE
+      else {
+        const answerValue = sessionAnswers[step.id];
+        match = this.evaluateRule(rule.if, answerValue);
+        console.log("SIMPLE match", match);
+      }
+
+      if (match) return rule.then.goTo;
     }
-    
-    
-    // 2Default navigation
-    if (navigation?.default === 'NEXT') {
-      return this.getNextSequentialStep(step, steps);
-    }
-    
-    if (navigation?.default === 'redirection') {
-      return step.redirection;
-    }
-    
-    //  Fallback historique
+  }
+
+  // 🔁 fallback
+  if (navigation?.default === 'NEXT') {
+    return this.getNextSequentialStep(step, steps);
+  }
+
+  if (navigation?.default === 'redirection') {
     return step.redirection;
   }
-  
-  static getNextSequentialStep(step, steps) {
+
+  return step.redirection;
+}
+
+
+    static getNextSequentialStep(step, steps) {
     const index = steps.findIndex(s => s.id === step.id);
     return steps[index + 1]?.id || 'FIN';
   }
+
+static extractValue(answerValue, field) {
+    if (answerValue == null) return [];
+  
+    //  JSON string (autocomplete, etc.)
+    if (typeof answerValue === 'string') {
+      try {
+        const parsed = JSON.parse(answerValue);
+        return this.extractValue(parsed, field);
+      } catch {
+        return [answerValue];
+      }
+    }
+  
+    //  multiple_choice → ['1','7']
+    if (Array.isArray(answerValue)) {
+      return answerValue.map(v => {
+        if (typeof v === 'object' && field) return v[field];
+        return v; // string/number
+      }).filter(v => v !== undefined);
+    }
+  
+    //  objet (single_choice, spinner, autocomplete)
+    if (typeof answerValue === 'object') {
+      if (field && field in answerValue) return [answerValue[field]];
+      if ('codeItem' in answerValue) return [answerValue.codeItem];
+      if ('value' in answerValue) return [answerValue.value];
+    }
+  
+    // 🔹 primitif
+    return [answerValue];
+  }
+static evaluateGridRule(rule, gridAnswer) {
+  if (!gridAnswer?.value) return false;
+
+  const valuesByRow = Object.values(gridAnswer.value);
+
+  // ---------------- AXE ROW ----------------
+if (rule.axis === 'row') {
+  switch (rule.operator) {
+    case 'ANY_EQUALS':
+      return valuesByRow.some(v => 
+        Array.isArray(v) ? v.includes(rule.value) : v === rule.value
+      );
+    case 'ALL_EQUALS':
+      return valuesByRow.every(v => 
+        Array.isArray(v) ? v.includes(rule.value) : v === rule.value
+      );
+    case 'COUNT_GTE':
+      return valuesByRow.reduce((acc, v) => acc + ((Array.isArray(v) ? v.includes(rule.value) : v === rule.value) ? 1 : 0), 0) >= rule.value;
+    default:
+      return false;
+  }
+}
+
+
+  // ---------------- AXE COLUMN ----------------
+if (rule.axis === 'column') {
+  const count = Object.values(gridAnswer.value).reduce((acc, cell) => {
+    if (Array.isArray(cell)) {
+      return acc + cell.filter(v => v === rule.column).length;
+    } else if (typeof cell === 'string') {
+      return acc + (cell === rule.column ? 1 : 0);
+    }
+    return acc;
+  }, 0);
+
+  switch (rule.operator) {
+    case 'COUNT_GTE': return count >= rule.value;
+    case 'COUNT_EQ': return count === rule.value;
+    case 'FILLED': return count > 0;
+    default: return false;
+  }
+}
+
+
+  return false;
+}
+
+
+
+
+  // static resolve(step, answerValue, steps) {
+    
+  //   const navigation = step.navigation;
+    
+  //   //  Règles conditionnelles
+  //   if (navigation?.rules?.length) {
+  //     for (const rule of navigation.rules) {
+  //       const match = this.evaluateRule(rule.if, answerValue);
+  //       if (match) {
+  //         return rule.then.goTo;
+  //       }
+  //     }
+      
+  //   }
+    
+    
+  //   // 2Default navigation
+  //   if (navigation?.default === 'NEXT') {
+  //     return this.getNextSequentialStep(step, steps);
+  //   }
+    
+  //   if (navigation?.default === 'redirection') {
+  //     return step.redirection;
+  //   }
+    
+  //   //  Fallback historique
+  //   return step.redirection;
+  // }
+  
+
   // static extractValue(answerValue, field) {
   //   if (answerValue == null) return null;
   //    // 🔥 PATCH : JSON string → objet
@@ -151,37 +300,37 @@ export default class NavigationRuleService {
   //   }
   
   //   return answerValue;
+  // // }
+  // static extractValue(answerValue, field) {
+  //   if (answerValue == null) return [];
+  
+  //   //  JSON string (autocomplete, etc.)
+  //   if (typeof answerValue === 'string') {
+  //     try {
+  //       const parsed = JSON.parse(answerValue);
+  //       return this.extractValue(parsed, field);
+  //     } catch {
+  //       return [answerValue];
+  //     }
+  //   }
+  
+  //   //  multiple_choice → ['1','7']
+  //   if (Array.isArray(answerValue)) {
+  //     return answerValue.map(v => {
+  //       if (typeof v === 'object' && field) return v[field];
+  //       return v; // string/number
+  //     }).filter(v => v !== undefined);
+  //   }
+  
+  //   //  objet (single_choice, spinner, autocomplete)
+  //   if (typeof answerValue === 'object') {
+  //     if (field && field in answerValue) return [answerValue[field]];
+  //     if ('codeItem' in answerValue) return [answerValue.codeItem];
+  //     if ('value' in answerValue) return [answerValue.value];
+  //   }
+  
+  //   // 🔹 primitif
+  //   return [answerValue];
   // }
-  static extractValue(answerValue, field) {
-    if (answerValue == null) return [];
-  
-    // 🔹 JSON string (autocomplete, etc.)
-    if (typeof answerValue === 'string') {
-      try {
-        const parsed = JSON.parse(answerValue);
-        return this.extractValue(parsed, field);
-      } catch {
-        return [answerValue];
-      }
-    }
-  
-    // 🔹 multiple_choice → ['1','7']
-    if (Array.isArray(answerValue)) {
-      return answerValue.map(v => {
-        if (typeof v === 'object' && field) return v[field];
-        return v; // string/number
-      }).filter(v => v !== undefined);
-    }
-  
-    // 🔹 objet (single_choice, spinner, autocomplete)
-    if (typeof answerValue === 'object') {
-      if (field && field in answerValue) return [answerValue[field]];
-      if ('codeItem' in answerValue) return [answerValue.codeItem];
-      if ('value' in answerValue) return [answerValue.value];
-    }
-  
-    // 🔹 primitif
-    return [answerValue];
-  }
   
 }

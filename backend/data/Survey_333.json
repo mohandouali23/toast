@@ -277,7 +277,7 @@
     "navigation": {
       "rules": [
         {
-          "if": { "operator": "IN",   "field": "codeItem","values": ["1", "3"] },
+          "if": { "operator": "IN",   "field": "codeItem","values": [1, 3] },
           "then": { "goTo": "q6" }
         }
       ],
@@ -294,7 +294,20 @@
     "page": 7,
     "required": true,
     "redirection": "q17",
-    
+     "navigation": {
+    "rules": [
+      {
+        "if": {
+          "conditions": [
+            { "questionId": "q10_1", "operator": "EQUALS", "value": 1 },
+            { "questionId": "q10_3", "operator": "IN", "values": [1, 2] }
+          ]
+        },
+        "then": { "goTo": "q6" }
+      }
+    ],
+    "default": "NEXT"
+  },
     "sections": [
       {"id_db_sect": "14R400",
       "id_sect": "q16_sect1",
@@ -438,6 +451,20 @@
   "label": "Activités pratiquées et motivation principale du séjour",
   "required": true,
   "redirection": "q13",
+   "navigation": {
+    "rules": [
+      {
+        "if": {
+          "type": "GRID",
+          "axis": "row",
+          "operator": "ANY_EQUALS",
+          "value": "R1"
+        },
+        "then": { "goTo": "q6" }
+      }
+    ],
+    "default": "NEXT"
+  },
   "page": 9,
   "questions": [
     { "id_db_qst": "Y1UEG9_q14_1",
@@ -503,6 +530,21 @@
   "label": "Activités pratiquées et motivation principale du séjour",
   "required": true,
   "redirection": "q15",
+  "navigation": {
+    "rules": [
+      {
+        "if": {
+          "type": "GRID",
+          "axis": "column",
+          "column": "R2",
+          "operator": "COUNT_GTE",
+          "value": 1
+        },
+        "then": { "goTo": "q6" }
+      }
+    ],
+    "default": "redirection"
+  },
   "questions": [
     { "id_db_qst": "Y1UEGY_q13_1",
     "id": "q13_1", "label": "Se promener, flâner" },
@@ -561,6 +603,20 @@
   "label": "Activités pratiquées et motivation principale du séjour",
   "required": true,
   "redirection": "q2",
+  "navigation": {
+    "rules": [
+      {
+        "if": {
+          "type": "GRID",
+          "axis": "row",
+          "operator": "ANY_EQUALS",
+          "value": "R2"
+        },
+        "then": { "goTo": "q6" }
+      }
+    ],
+    "default": "redirection"
+  },
   "questions": [
     { "id_db_qst": "Y1U3FY_q15_1", "id": "q15_1", "label": "Se promener, flâner","required": true },
     { "id_db_qst": "Y1U3FY_q15_2","id": "q15_2", "label": "Visites de musées, monuments" ,"required": true},
@@ -641,77 +697,6 @@
   "output_cond": "value.length > 0",
   "isSubQuestion": false,
   "id_db": "KO3HT8"
-},
-
-{"id_db": "KO6H25",
-"id": "q25",
-"type": "multiple_choice",
-"label": "TEST  du transport en commun",
-"redirection": "q8",
-"required": true,
-"options": [
-  {
-    "codeItem": 1,
-    "label": "avion"
-},
-{
-  "codeItem": 2,
-  "label": "car",
-  "subQuestions": [
-    {"id_db": "KO3A23",
-    "id": "q25_CAR",
-    "type": "single_choice",
-    "label": "  sub qst?",
-    "options": [
-      {
-        "codeItem": 4,
-        "label": "A multipl"
-      },
-      {
-        "codeItem": 8,
-        "label": " S mul",
-        "requiresPrecision": true
-      },
-      {
-        "codeItem": 11,
-        "label": "z mul"
-      }
-    ]
-  }
-]
-},
-{
-  "codeItem": 7,
-  "label": "fly",
-  "subQuestions": [
-    {"id_db": "ST3T8U",
-    "id": "q25_F",
-    "type": "multiple_choice",
-    "label": "Quels transports utilisez-vous  sub qst?",
-    "options": [
-      {
-        "codeItem": 1,
-        "label": "BusS"
-      },
-      {
-        "codeItem": 2,
-        "label": "Train S",
-        "requiresPrecision": true
-      },
-      {
-        "codeItem": 3,
-        "label": "Voiture S"
-      },
-      {
-        "codeItem": 6,
-        "label": "Aucun S",
-        "exclusive": true
-      }
-    ]
-  }
-]
-}
-]
 },
 {"id_db": "KO6HT8",
 "id": "q24",
@@ -820,7 +805,7 @@
 "page":42,
 "type": "multiple_choice",
 "label": "transport en commun",
-"redirection": "q4",
+"redirection": "q3",
 "required": true,
 "navigation": {
 "rules": [

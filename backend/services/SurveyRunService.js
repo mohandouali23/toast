@@ -376,7 +376,10 @@ export default class SurveyRunService {
           return NavigationRuleService.resolve(rotationAdvance.fallbackFrom, session.answers[rotationAdvance.fallbackFrom.id], survey.steps);
         }
         
-        return NavigationRuleService.resolve(currentStep, session.answers[currentStep.id], survey.steps);
+        // return NavigationRuleService.resolve(currentStep, session.answers[currentStep.id], survey.steps);
+        return NavigationRuleService.resolve(currentStep, session.answers, survey.steps);
+        
+        
       }
     }
     

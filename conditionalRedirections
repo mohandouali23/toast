@@ -34,7 +34,44 @@ Un moteur de règles lit le JSON et décide de la prochaine étape
 | `BETWEEN`    | entre          |
 | `FILLED`     | champ non vide |
 | `EMPTY`      | champ vide     |
+{
+  "if": {
+    "type": "GRID",
+    "axis": "row",
+    "operator": "ANY_EQUALS",
+    "value": "R1"
+  },
+  "then": { "goTo": "q13" }
+}
 
+{
+  "if": {
+    "type": "GRID",
+    "axis": "column",
+    "column": "R2",
+    "operator": "COUNT_GTE",
+    "value": 1
+  },
+  "then": { "goTo": "q15" }
+}
+1️⃣ RÈGLES MÉTIER (ce que tu veux exprimer)
+🔹 Q14 (axis = row – Oui / Non) ANY_EQUALS
+
+Si au moins une activité = "oui" (R1) → aller à q13
+
+Sinon → aller directement à q15 ➡️ NEXT = q15 (si aucune activité = oui)
+
+🔹 Q13 (axis = column) "COUNT_GTE",
+
+Si Motivation principale (R2) sélectionnée pour au moins une activité → aller à q15
+
+Sinon → aller à q2
+
+🔹 Q15 (axis = row – checkbox)ANY_EQUALS
+
+Si "never" (R2) cochée au moins une fois → aller à q2
+
+Sinon → navigation normale
 *exemples
 1.Question âge:
   Règles ( âge < 18 → q3 , 19 à 30 → q6 , ≥ 31 → FIN )
