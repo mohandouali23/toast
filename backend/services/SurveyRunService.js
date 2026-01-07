@@ -81,10 +81,31 @@ export default class SurveyRunService {
         
         if (rawValue === undefined) return;
         console.log('rawvalue',rawValue)
-        const normalized = ResponseNormalizer.normalize(step, rawValue, wrapper?.optionIndex);
-        console.log("norlize",normalized)
+        const normalizedRaw = ResponseNormalizer.normalize(step, rawValue, wrapper?.optionIndex);
+        console.log("norlize",normalizedRaw)
+
+        //  Nettoyage : supprimer undefined / null / string vide
+const normalized = Object.fromEntries(
+  Object.entries(normalizedRaw || {}).filter(([_, v]) =>
+    v !== undefined &&
+    v !== null &&
+    !(typeof v === 'string' && v.trim() === '')
+  )
+);
+
+console.log('normalized cleaned', normalized);
         const mainValue = this.getMainValue(step, body, rawValue);
-        
+        if (
+          !normalized ||
+          Object.keys(normalized).length === 0 ||
+          mainValue === null ||
+          mainValue === '' ||
+          (Array.isArray(mainValue) && mainValue.length === 0)
+        ) {
+          console.log('⛔ normalized vide → skip save', step.id);
+
+          return;
+        }
         // this.cleanupSession(step, session.answers, mainValue, body);
         this.cleanupSession(step, session, mainValue, body);
         

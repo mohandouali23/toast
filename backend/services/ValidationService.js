@@ -10,14 +10,14 @@ export default class ValidationService {
       // Récupérer la valeur du parent
       let parentValue = parentAnswerKey ? answers[parentAnswerKey] : null;
 
-      console.log('DEBUG: option', opt.label, 'parentValue', parentValue);
+     // console.log('DEBUG: option', opt.label, 'parentValue', parentValue);
 
       // Vérifier si l’option est sélectionnée dans le parent
       const isSelected = Array.isArray(parentValue)
         ? parentValue.some(v => v?.toString() === opt.codeItem?.toString())
         : parentValue?.toString() === opt.codeItem?.toString();
 
-      console.log('DEBUG: isSelected', isSelected);
+      //console.log('DEBUG: isSelected', isSelected);
       if (!isSelected) return; // ne pas valider les sous-questions si l’option n’est pas choisie
 
       if (!opt.subQuestions?.length) return;
@@ -39,7 +39,7 @@ export default class ValidationService {
               const value = answers[key];
               if (subQ.required && !ValidationService.hasRealAnswer(value)) {
                 missingFields.push(path ? `${path} > ${subQ.label || subQ.id}` : subQ.label || subQ.id);
-                console.log('DEBUG: missingFields pushed (multiple parent)', missingFields[missingFields.length - 1]);
+           //     console.log('DEBUG: missingFields pushed (multiple parent)', missingFields[missingFields.length - 1]);
               }
 
               // Récursivité sur les options de la sous-question
@@ -60,12 +60,12 @@ export default class ValidationService {
         }
 
         const value = answers[subAnswerKey];
-        console.log('DEBUG: subQ', subQ.label, 'subAnswerKey', subAnswerKey, 'value', value);
+      //  console.log('DEBUG: subQ', subQ.label, 'subAnswerKey', subAnswerKey, 'value', value);
 
         // Vérifier la sous-question obligatoire
         if (subQ.required && !ValidationService.hasRealAnswer(value)) {
           missingFields.push(path ? `${path} > ${subQ.label || subQ.id}` : subQ.label || subQ.id);
-          console.log('DEBUG: missingFields pushed', missingFields[missingFields.length - 1]);
+        //  console.log('DEBUG: missingFields pushed', missingFields[missingFields.length - 1]);
         }
 
         // Récursivité sur les options de la sous-question
