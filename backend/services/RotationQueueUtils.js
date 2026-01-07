@@ -14,20 +14,14 @@ export default class RotationQueueUtils {
     ? selectedOptions.map(Number)
     : selectedOptions.toString().split('/').map(Number);
     
-    //console.log("selected",selectedArray)
-    
     /* ==========================================
     1 Vérifier option exclusive
     ========================================== */
     const hasExclusive = selectedArray.some(code => {
-      // console.log("code",code)
       const opt = mainStep.options.find(o => o.codeItem === code);
-      //console.log("opt",opt)
       return opt?.exclusive === true;
     });
-    // console.log("exclusive",hasExclusive)
     if (hasExclusive) {
-      //console.log(' Option exclusive détectée → pas de rotation');
       return [];
     }
     
@@ -85,7 +79,6 @@ export default class RotationQueueUtils {
       console.warn('Survey non trouvé dans le cache');
       return [];
     }
-    
     const answers = session.answers;
     
     // Régénérer la rotationQueue complète comme à l'initialisation

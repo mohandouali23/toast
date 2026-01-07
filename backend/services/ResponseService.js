@@ -21,10 +21,16 @@ export default class ResponseService {
     
     // fusionner Map existante avec les nouvelles réponses
     const currentAnswers = new Map(response.answers); // récupère l'existant
-    // ❌ Supprimer les anciennes clés
+    //  Supprimer les anciennes clés
     keysToDelete.forEach(key => currentAnswers.delete(key));
+
     for (const [key, value] of Object.entries(answer)) {
+      // Pour les tableaux (multi-choice), on peut stocker directement le tableau
+    if (Array.isArray(value)) {
       currentAnswers.set(key, value);
+    } else {
+      currentAnswers.set(key, value);
+    }
     }
     response.answers = currentAnswers;
     

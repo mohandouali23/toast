@@ -2,37 +2,90 @@ import ToastService from './ToastService.js';
 
 export default class ValidationService {
   
-  // ---------------- Helper ----------------
-  static validateQuestionRecursive(question, answers, wrapper = null, path = '') {
-  const missingFields = [];
-
-  // clé de session pour récupérer la réponse
-  const answerKey = wrapper?.optionIndex !== undefined ? `${question.id}_${wrapper.optionIndex}` : question.id;
-  const value = answers[answerKey];
-
-  // Si la question est obligatoire et sans réponse → erreur
-  if (question.required && !ValidationService.hasRealAnswer(value)) {
-    missingFields.push(path ? `${path} > ${question.label || question.id}` : question.label || question.id);
-  }
-
-  // Vérifie si la question a des sous-questions
-  if (question.options?.length) {
-    question.options.forEach(opt => {
-      // si la réponse principale correspond à l’option
-      if (Array.isArray(value) ? value.includes(opt.codeItem) : value == opt.codeItem) {
-        if (opt.subQuestions?.length) {
-          opt.subQuestions.forEach(subQ => {
-            // Appel récursif pour valider la sous-question
-            missingFields.push(...ValidationService.validateQuestionRecursive(subQ, answers, wrapper, path ? `${path} > ${question.label}` : question.label));
+  // ---------------- Helper récursif pour sous-questions ----------------
+  static validateSubQuestionsRecursive(options = [], answers, wrapper = null, path = '', parentAnswerKey = null) {
+    const missingFields = [];
+    
+    options.forEach(opt => {
+      // Récupérer la valeur du parent
+      let parentValue = parentAnswerKey ? answers[parentAnswerKey] : null;
+      
+      console.log('DEBUG: option', opt.label, 'parentValue', parentValue);
+      
+      // Vérifier si l’option est sélectionnée dans le parent
+      const isSelected = Array.isArray(parentValue)
+      ? parentValue.some(v => v?.toString() === opt.codeItem?.toString())
+      : parentValue?.toString() === opt.codeItem?.toString();
+      
+      console.log('DEBUG: isSelected', isSelected);
+      if (!isSelected) return; // ne pas valider les sous-questions si l’option n’est pas choisie
+      
+      if (!opt.subQuestions?.length) return;
+      
+      opt.subQuestions.forEach(subQ => {
+        
+        // ----- Construire correctement la clé de la sous-question -----
+        let subAnswerKey;
+        
+        if (wrapper?.optionIndex !== undefined) {
+          // Cas wrapper (accordion ou liste imbriquée)
+          subAnswerKey = `${subQ.id}_${wrapper.optionIndex}`;
+        } else if (parentAnswerKey) {
+          subAnswerKey = `${parentAnswerKey}_${opt.codeItem}_${subQ.id}`;
+        } else {
+          // Parent single_choice
+          subAnswerKey = subQ.id;
+            }
+      
+      
+      const value = answers[subAnswerKey];
+      console.log('DEBUG: subQ', subQ.label, 'subAnswerKey', subAnswerKey, 'value', value);
+      
+      // Vérifier la sous-question obligatoire
+      if (subQ.required && !ValidationService.hasRealAnswer(value)) {
+        missingFields.push(path ? `${path} > ${subQ.label || subQ.id}` : subQ.label || subQ.id);
+        console.log('DEBUG: missingFields pushed', missingFields[missingFields.length - 1]);
+      }
+      
+      // Récursivité sur les options de la sous-question
+      if (subQ.options?.length && (subQ.required || ValidationService.hasRealAnswer(value))) {
+        missingFields.push(
+          ...ValidationService.validateSubQuestionsRecursive(
+            subQ.options,
+            answers,
+            wrapper,
+            path ? `${path} > ${subQ.label}` : subQ.label,
+            subAnswerKey
+          )
+        );
+      }
+      // Si c’est un accordion
+      if (subQ.type === 'accordion') {
+        (subQ.sections || []).forEach(section => {
+          (section.questions || []).forEach(q => {
+            const qAnswerKey = wrapper?.optionIndex !== undefined ? `${q.id}_${wrapper.optionIndex}` : q.id;
+            const qValue = answers[qAnswerKey];
+            if (q.required && !ValidationService.hasRealAnswer(qValue)) {
+              missingFields.push(`${path ? path + ' > ' : ''}${subQ.label || subQ.id} > ${section.title} > ${q.label || q.id}`);
+              console.log('DEBUG: accordion missingFields pushed', missingFields[missingFields.length - 1]);
+            }
+            if (q.options?.length) {
+              missingFields.push(
+                ...ValidationService.validateSubQuestionsRecursive(q.options, answers, wrapper, `${path ? path + ' > ' : ''}${subQ.label || subQ.id} > ${section.title}`, qAnswerKey)
+                );
+              }
+            });
           });
         }
-      }
+                  
+      });
     });
+                  
+    return missingFields;
   }
-
-  return missingFields;
-}
-
+                  
+  // ---------------- Helper ----------------
+  
   static hasRealAnswer(value) {
     if (value === null || value === undefined) return false;
     if (typeof value === 'string') return value.trim() !== '';
@@ -76,15 +129,24 @@ export default class ValidationService {
           break;
           
           case 'multiple_choice':
-          if (!Array.isArray(value) || value.filter(v => v && v.trim() !== '').length === 0) {
-            missingFields.push(`${section.title} > ${question.label || question.id}`);
-          }
-          break;
+            if (
+              (!Array.isArray(value) && !value) || // ni tableau ni string
+              (Array.isArray(value) && value.filter(v => v && v.trim() !== '').length === 0) || // tableau vide
+              (typeof value === 'string' && value.trim() === '') // string vide
+            ) {
+              missingFields.push(`${section.title} > ${question.label || question.id}`);
+            }
+            break;
+          
           
           default:
-          if (!ValidationService.hasRealAnswer(value)) {
-            missingFields.push(`${section.title} > ${question.label || question.id}`);
-          }
+            if (q.options?.length) {
+              const answerKey = wrapper?.optionIndex !== undefined ? `${q.id}_${wrapper.optionIndex}` : q.id;
+              missingFields.push(
+                ...ValidationService.validateSubQuestionsRecursive(q.options, answers, wrapper, q.label, answerKey)
+              );
+            }
+            
         }
       });
     });
@@ -132,437 +194,80 @@ export default class ValidationService {
     if (missingRows.length || missingColumns.length) {
       let message = '';
       if (missingRows.length) message += `Veuillez répondre à chaque ligne obligatoire :<br>${missingRows.map(r => `• ${r}`).join('<br>')}<br>`;
-      if (missingColumns.length) message += `Veuillez répondre à chaque colonne obligatoire :<br>${missingColumns.map(c => `• ${c}`).join('<br>')}`;
-      ValidationService.showMissingToast(message);
-      return false;
-    }
-    
-    return true;
-  }
-  
-  // ---------------- Vérification d'un step ----------------
-  static validateStep(step, answers, wrapper = null) {
-    if (step.type === 'grid') return ValidationService.validateGridStep(step, answers);
-    
-    const missingFields = [];
-    const questionList = step.questions || [step];
-    
-    questionList.forEach(q => {
-      const answerKey = wrapper?.optionIndex !== undefined ? `${q.id}_${wrapper.optionIndex}` : q.id;
-      const value = answers[answerKey];
-      if (!q.required) return;
-      
-      switch (q.type) {
-        case 'text':
-        case 'spinner':
-        case 'autocomplete':
-        if (!ValidationService.hasRealAnswer(value)) missingFields.push(q.label || q.id);
-        break;
-        
-        case 'single_choice':
-        if (!ValidationService.hasRealAnswer(value)) missingFields.push(q.label || q.id);
-        else {
-          const selectedOption = q.options?.find(opt => opt.codeItem?.toString() === value?.toString());
-          if (selectedOption?.requiresPrecision && !ValidationService.checkPrecision(q.id, value, answers)) {
-            missingFields.push(`Précision pour "${selectedOption.label}"`);
-          }
-        }
-        break;
-        
-        case 'multiple_choice':
-        const selectedArray = Array.isArray(value) ? value.filter(v => v && v.trim() !== '') : [];
-        if (!selectedArray.length) missingFields.push(q.label || q.id);
-        else {
-          selectedArray.forEach(codeItem => {
-            const selectedOption = q.options?.find(opt => opt.codeItem?.toString() === codeItem?.toString());
-            if (selectedOption?.requiresPrecision && !ValidationService.checkPrecision(q.id, codeItem, answers)) {
-              missingFields.push(`Précision pour "${selectedOption.label}"`);
+                  if (missingColumns.length) message += `Veuillez répondre à chaque colonne obligatoire :<br>${missingColumns.map(c => `• ${c}`).join('<br>')}`;
+                  ValidationService.showMissingToast(message);
+                  return false;
+                }
+                
+                return true;
+              }
+              
+              // ---------------- Vérification d'un step ----------------
+              static validateStep(step, answers, wrapper = null) {
+                if (step.type === 'grid') return ValidationService.validateGridStep(step, answers);
+                
+                const missingFields = [];
+                const questionList = step.questions || [step];
+                
+                questionList.forEach(q => {
+                  const answerKey = wrapper?.optionIndex !== undefined ? `${q.id}_${wrapper.optionIndex}` : q.id;
+                  const value = answers[answerKey];
+                  if (!q.required) return;
+                  
+                  switch (q.type) {
+                    case 'text':
+                    case 'spinner':
+                    case 'autocomplete':
+                    if (!ValidationService.hasRealAnswer(value)) missingFields.push(q.label || q.id);
+                    break;
+                    
+                    case 'single_choice':
+                    if (!ValidationService.hasRealAnswer(value)) missingFields.push(q.label || q.id);
+                    else {
+                      const selectedOption = q.options?.find(opt => opt.codeItem?.toString() === value?.toString());
+                      if (selectedOption?.requiresPrecision && !ValidationService.checkPrecision(q.id, value, answers)) {
+                        missingFields.push(`Précision pour "${selectedOption.label}"`);
+                      }
+                    }
+                    break;
+                    
+                    case 'multiple_choice':
+                    const selectedArray = Array.isArray(value) ? value.filter(v => v && v.trim() !== '') : [];
+                    if (!selectedArray.length) missingFields.push(q.label || q.id);
+                    else {
+                      selectedArray.forEach(codeItem => {
+                        const selectedOption = q.options?.find(opt => opt.codeItem?.toString() === codeItem?.toString());
+                        if (selectedOption?.requiresPrecision && !ValidationService.checkPrecision(q.id, codeItem, answers)) {
+                          missingFields.push(`Précision pour "${selectedOption.label}"`);
+                        }
+                      });
+                    }
+                    break;
+                    
+                    case 'accordion':
+                    ValidationService.validateAccordion(q, answers, missingFields);
+                    break;
+                    
+                    default:
+                    if (!ValidationService.hasRealAnswer(value)) missingFields.push(q.label || q.id);
+                  }
+                  // Valider récursivement toutes les sous-questions
+                  if (q.options?.length) {
+                    missingFields.push(
+                      ...ValidationService.validateSubQuestionsRecursive(q.options, answers, wrapper, q.label, answerKey)
+                    );
+                  }
+                  
+                });
+                
+                if (missingFields.length > 0) {
+                  const message = `Veuillez répondre aux questions obligatoires : ${missingFields.join(', ')}`;
+                  ValidationService.showMissingToast(message);
+                  return false;
+                }
+                
+                return true;
+              }
             }
-          });
-        }
-        break;
-        
-        case 'accordion':
-        ValidationService.validateAccordion(q, answers, missingFields);
-        break;
-        
-        default:
-        if (!ValidationService.hasRealAnswer(value)) missingFields.push(q.label || q.id);
-      }
-    });
-    
-    if (missingFields.length > 0) {
-      const message = `Veuillez répondre aux questions obligatoires : ${missingFields.join(', ')}`;
-      ValidationService.showMissingToast(message);
-      return false;
-    }
-    
-    return true;
-  }
-}
-
-
-
-
-// import ToastService from './ToastService.js';
-
-// export default class ValidationService {
-
-//   static hasRealAnswer(obj) {
-//     if (!obj || typeof obj !== 'object') return false;
-
-//     return Object.entries(obj)
-//       .filter(([key]) => key !== 'action')
-//       .some(([_, v]) => {
-  //         if (v === null || v === undefined) return false;
-//         if (typeof v === 'string') return v.trim() !== '';
-//         if (Array.isArray(v)) return v.length > 0;
-//         if (typeof v === 'object') return ValidationService.hasRealAnswer(v);
-//         return true;
-//       });
-//   }
-//   static validateAccordion(step, answers, missingFields) {
-//     const answer = answers[step.id]; // q16
-//     if (!answer || typeof answer !== 'object') {
-//       missingFields.push(step.label || step.id);
-//       return;
-//     }
-
-//     (step.sections || []).forEach(section => {
-  //       (section.questions || []).forEach(question => {
-    //         const key = question.id;
-//         const value = answer[key];
-
-//         if (!question.required) return;
-
-//         switch (question.type) {
-//           case 'text':
-//           case 'spinner':
-//           case 'autocomplete':
-//           case 'single_choice':
-//             if (!value || value.trim?.() === '') {
-//               missingFields.push(`${section.title} > ${question.label || question.id}`);
-//             }
-//             break;
-
-//           case 'multiple_choice':
-//             const arr = Array.isArray(value) ? value.filter(v => v && v.trim() !== '') : [];
-//             if (arr.length === 0) {
-//               missingFields.push(`${section.title} > ${question.label || question.id}`);
-//             }
-//             break;
-
-//           default:
-//             if (!value) missingFields.push(`${section.title} > ${question.label || question.id}`);
-//         }
-//       });
-//     });
-//   }
-
-//   static validateGridStep(step, answers) {
-//     const answer = answers[step.id];
-//     const realValue = answer?.value;
-
-//     console.log('GRID realValue', realValue);
-
-//     // Vérification initiale
-//     if (!realValue || Object.keys(realValue).length === 0) {
-//       ToastService.show(
-//         `Veuillez répondre à la question obligatoire : ${step.label || step.id}`,
-//         { type: 'error' }
-//       );
-//       return false;
-//     }
-
-//     const missingRows = [];
-//     const missingColumns = [];
-
-//     // ===========================
-//     // VALIDATION LIGNES (required)
-//     // ===========================
-//     (step.questions || []).forEach(question => {
-  //       if (question.required === true) {
-//         const questionAnswer = realValue[question.id];
-//         let hasAnswer = false;
-
-//         if (typeof questionAnswer === 'string') {
-//           hasAnswer = questionAnswer.trim() !== '';
-//         } 
-//         else if (Array.isArray(questionAnswer)) {
-//           hasAnswer = questionAnswer.length > 0;
-//         }
-
-//         if (!hasAnswer) {
-//           missingRows.push(question.label || question.id);
-//         }
-//       }
-//     });
-
-//     // ===========================
-//     // VALIDATION COLONNES (axis=column)
-//     // ===========================
-//     (step.reponses || []).forEach(response => {
-  //       if (response.input?.axis === 'column' && response.input?.required === true) {
-//         const responseId = response.id;
-//         let hasAnswer = false;
-
-//         // CAS 1 — RADIO COLUMN (clé = colonne)
-//         if (
-//           typeof realValue[responseId] === 'string' &&
-//           realValue[responseId].trim() !== ''
-//         ) {
-//           hasAnswer = true;
-//         }
-
-//         // CAS 2 — CHECKBOX COLUMN (clé = ligne)
-//         (step.questions || []).forEach(question => {
-  //           const rowAnswer = realValue[question.id];
-//           if (!rowAnswer) return;
-
-//           // cellule désactivée
-//           if (question.cells?.[responseId]?.enabled === false) return;
-
-//           if (Array.isArray(rowAnswer) && rowAnswer.includes(responseId)) {
-//             hasAnswer = true;
-//           }
-//         });
-
-//         if (!hasAnswer) {
-//           missingColumns.push(response.label || responseId);
-//         }
-//       }
-//     });
-
-//     // ===========================
-//     // MESSAGE ERREUR
-//     // ===========================
-//     if (missingRows.length > 0 || missingColumns.length > 0) {
-//       let message = '';
-
-//       if (missingRows.length > 0) {
-//         message += `Veuillez répondre à chaque ligne obligatoire :<br>${missingRows
-//           .map(r => `• ${r}`)
-//           .join('<br>')}<br>`;
-//       }
-
-//       if (missingColumns.length > 0) {
-//         message += `Veuillez répondre à chaque colonne obligatoire :<br>${missingColumns
-//           .map(c => `• ${c}`)
-//           .join('<br>')}`;
-//       }
-
-//       ToastService.show(message, { type: 'error' });
-//       return false;
-//     }
-
-//     return true;
-//   }
-
-
-//   static validateStep(step, answers, wrapper = null) {
-//     //  validation spéciale pour grid au niveau step
-// //     if (step.type === 'grid') {
-// //       const answer = answers[step.id];
-// //       const realValue = answer?.value;
-
-// //       console.log('GRID realValue', realValue);
-
-// //       // Vérification initiale
-// //       if (!realValue || Object.keys(realValue).length === 0) {
-// //         const message = `Veuillez répondre à la question obligatoire : ${step.label || step.id}`;
-// //         ToastService.show(message, { type: 'error' });
-// //         return false;
-// //       }
-
-// //       console.log("step grid", step);
-
-// //       // Vérification des lignes obligatoires
-// //       if (step.questions && step.questions.length > 0) {
-// //         const missingRows = [];
-// //         const missingColumns = [];
-
-// // // ===========================
-// //   // VALIDATION LIGNES (required)
-// //   // ===========================
-// //         step.questions.forEach(question => {
-  // //           if (question.required === true) {
-// //             const questionId = question.id;
-// //             const questionLabel = question.label || questionId;
-// //             const questionAnswer = realValue[questionId];     
-// //             let hasAnswer = false;
-
-// //             if (questionAnswer) {
-// //               if (typeof questionAnswer === 'string') {
-// //                 // Cas radio: string non vide
-// //                 hasAnswer = questionAnswer.trim() !== '';
-// //               } else if (Array.isArray(questionAnswer)) {
-// //                 // CHECKBOX
-// //                 hasAnswer = questionAnswer.length > 0;
-// //               }
-// //               // else if (typeof questionAnswer === 'object') {
-// //               //   // Cas checkbox: objet avec des tableaux
-// //               //   // Vérifier si au moins un tableau n'est pas vide
-// //               //   for (const key in questionAnswer) {
-// //               //     const value = questionAnswer[key];
-// //               //     if (Array.isArray(value) && value.length > 0) {
-// //               //       hasAnswer = true;
-// //               //       break;
-// //               //     }
-// //               //   }
-// //               // }
-// //             }
-
-// //             if (!hasAnswer) {
-// //               missingRows.push(questionLabel);
-// //             }
-// //           }
-// //         });
-// //   // ===========================
-// // // VALIDATION COLONNES (axis=column)
-// // // ===========================
-// // step.reponses.forEach(response => {
-  // //   if (response.input?.axis === 'column' && response.input?.required === true) {
-// //     const responseId = response.id;
-// //     let hasAnswer = false;
-
-// //     // CAS 1 — RADIO COLUMN (clé = colonne)
-// //     if (
-// //       typeof realValue[responseId] === 'string' &&
-// //       realValue[responseId].trim() !== ''
-// //     ) {
-// //       hasAnswer = true;
-// //     }
-
-// //     // CAS 2 — CHECKBOX COLUMN (clé = ligne)
-// //     step.questions.forEach(question => {
-  // //       const rowAnswer = realValue[question.id];
-// //       if (!rowAnswer) return;
-
-// //       // cellule désactivée
-// //       if (question.cells?.[responseId]?.enabled === false) return;
-
-// //       if (Array.isArray(rowAnswer) && rowAnswer.includes(responseId)) {
-// //         hasAnswer = true;
-// //       }
-// //     });
-
-// //     if (!hasAnswer) {
-// //       missingColumns.push(response.label || responseId);
-// //     }
-// //   }
-// // });
-
-
-
-// //   // ===========================
-// //   // MESSAGE ERREUR
-// //   // ===========================
-// //   if (missingRows.length > 0 || missingColumns.length > 0) {
-// //     let message = '';
-
-// //     if (missingRows.length > 0) {
-// //       message += `Veuillez répondre à chaque ligne obligatoire :<br>${missingRows
-// //         .map(r => `• ${r}`)
-// //         .join('<br>')}<br>`;
-// //     }
-
-// //     if (missingColumns.length > 0) {
-// //       message += `Veuillez répondre à chaque colonne obligatoire :<br>${missingColumns
-// //         .map(c => `• ${c}`)
-// //         .join('<br>')}`;
-// //     }
-
-// //     ToastService.show(message, { type: 'error' });
-// //     return false;
-// //   }
-// //       }
-
-// //       return true; // Grid validée
-// //     }
-
-// if (step.type === 'grid') {
-//   return ValidationService.validateGridStep(step, answers);
-// }
-
-//     let isValid = true;
-//     const missingFields = [];
-//     const questionList = step.questions || [step];
-
-//     questionList.forEach(question => {
-  //       const answerKey = wrapper?.optionIndex !== undefined
-//         ? `${question.id}_${wrapper.optionIndex}`
-//         : question.id;
-
-//       const answer = answers[answerKey];
-
-//       if (!question.required) return;
-
-//       switch (question.type) {
-//         case 'text':
-//         case 'spinner':
-//         case 'autocomplete':
-//           if (!answer || answer.trim?.() === '') missingFields.push(question.label || question.id);
-//           break;
-// case 'single_choice':
-//   //console.log('answer for single_choice:', answers);
-
-
-//           if (!answer || answer.trim?.() === '') {
-//             missingFields.push(question.label || question.id);
-//           } else {
-  //             // Vérifier si l'option sélectionnée a un champ de précision requis
-//             const selectedOption = question.options?.find(
-//               opt => opt.codeItem?.toString() === answer?.toString()
-//             );
-//             if (selectedOption?.requiresPrecision) {
-//               //console.log('precision key:', `precision_${answer}`);
-
-//               const precisionValue = answers[`${question.id}_pr_${answer}`] || answers[`precision_${answer}`];
-//               //console.log('precision value:', precisionValue);
-//               if (!precisionValue || precisionValue.trim() === '') {
-//                 missingFields.push(`Précision pour "${selectedOption.label}"`);
-//               }
-//             }
-//           }
-//           break;
-//        case 'multiple_choice': {
-//   const selectedArray = Array.isArray(answer) ? answer.filter(v => v && v.trim() !== '') : [];
-
-//   if (selectedArray.length === 0) {
-//     missingFields.push(question.label || question.id);
-//   } else {
-  //     selectedArray.forEach(codeItem => {
-    //       const precisionKey = `${question.id}_pr_${codeItem}`;
-//       const precisionValue = answers[precisionKey];
-
-//       const selectedOption = question.options?.find(
-//         opt => opt.codeItem?.toString() === codeItem?.toString()
-//       );
-//       if (selectedOption?.requiresPrecision && (!precisionValue || precisionValue.trim() === '')) {
-//         missingFields.push(`Précision pour "${selectedOption.label}"`);
-//       }
-//     });
-//   }
-//   break;
-// }
-//         // case 'accordion':
-//         //   if (!ValidationService.hasRealAnswer(answer)) missingFields.push(question.label || question.id);
-//         //   break;
-// case 'accordion':
-//   ValidationService.validateAccordion(question, answers, missingFields);
-//   break;
-
-//         default:
-//           if (!answer) missingFields.push(question.label || question.id);
-//       }
-//     });
-
-//     if (missingFields.length > 0) {
-//       isValid = false;
-//       const message = `Veuillez répondre aux questions obligatoires : ${missingFields.join(', ')}`;
-//       ToastService.show(message, { type: 'error' });
-//     }
-
-//     return isValid;
-//   }
-// }
+            
+            
