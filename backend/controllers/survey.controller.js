@@ -108,7 +108,7 @@ function prepareSteps(steps, sessionAnswers, options, rotationQueue = []) {
     }
     
     // Préparer selon le type
-    // if (step.type === 'grid') step = SurveyService.prepareGridB(step);
+    
     if (step.type === 'grid') {
       const existingAnswer = sessionAnswers[step.id]?.value;
       step = SurveyService.prepareGridB(step, existingAnswer);

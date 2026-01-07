@@ -13,24 +13,6 @@ export default class SurveyService {
     return survey.steps.find(s => s.id === stepId);
   }
   
-  // static resolveNextStep({ survey, step, answers }) {
-  //   if (!step) return null;
-  
-  //   const answerValue = answers[step.id];
-  
-  //   const nextStepId = NavigationRuleService.resolve(
-  //     step,
-  //     answerValue,
-  //     survey.steps
-  //   );
-  
-  //   if (!nextStepId || nextStepId === 'FIN') {
-  //     return null;
-  //   }
-  
-  //   return nextStepId;
-  // }
-  
   static loadTable(tableName) {
     try {
       const filePath = path.resolve(`backend/data/${tableName}.json`);
@@ -52,14 +34,14 @@ export default class SurveyService {
     step.type_autocomplete = step.type === 'autocomplete';
     step.type_grid = step.type === 'grid';
     step.type_accordion = step.type === 'accordion';
-    
+    // ---------- GESTION DES OPTIONS & SOUS-QUESTIONS ----------
     if (step.options) {
       step.options = step.options.map(option => {
         option.hasSubQuestions =
         Array.isArray(option.subQuestions) && option.subQuestions.length > 0;
-        
+         // Afficher les sous-questions si l’option est sélectionnée
         option.showSubQuestions = option.isSelected === true;
-        
+        // Préparer les sous-questions
         if (option.hasSubQuestions) {
           option.subQuestions = option.subQuestions.map(q => {
             //  sécuriser tous les champs obligatoires
@@ -158,8 +140,6 @@ export default class SurveyService {
         
         // CHECKBOX
         if (isCheckbox) {
-          // name = `value[${row.id}][${col.id}][]`;
-          // value = row.id;
           name = `value[${row.id}][]`;
           value = col.id;
           
@@ -167,21 +147,6 @@ export default class SurveyService {
           Array.isArray(existingAnswer?.[row.id]) &&
           existingAnswer[row.id].includes(col.id);
         }
-        //1 // On vérifie uniquement la ligne et la colonne correspondantes
-        // if (
-        //   existingAnswer?.[row.id]?.[col.id] &&
-        //   Array.isArray(existingAnswer[row.id][col.id]) &&
-        //   existingAnswer[row.id][col.id].includes(row.id)
-        // ) {
-        //   checked = true;
-        // }
-        //2 if (
-        //   Array.isArray(existingAnswer?.[col.id]) &&
-        //   existingAnswer[col.id].some(v => v.value === row.id)
-        // ) {
-        //   checked = true;
-        // }
-        //}
         
         return {
           ...col,

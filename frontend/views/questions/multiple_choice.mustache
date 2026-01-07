@@ -3,46 +3,84 @@
     <input type="checkbox" 
     name="{{id}}[]" 
     value="{{codeItem}}"
-     {{#isSelected}}checked{{/isSelected}}
-           data-requires-precision="{{requiresPrecision}}"
-           data-exclusive="{{exclusive}}">
+    data-has-sub="{{hasSubQuestions}}"
+    {{#isSelected}}checked{{/isSelected}}
+    data-requires-precision="{{requiresPrecision}}"
+    data-exclusive="{{exclusive}}">
     {{label}}
   </label>
+
   <input type="text"
    name="precision_{{id}}_{{codeItem}}"
    class="precision-input" 
    value="{{precisionValue}}"
-  style="{{#showPrecision}}display:inline-block;{{/showPrecision}}{{^showPrecision}}display:none;{{/showPrecision}}"
+   style="{{#showPrecision}}display:inline-block;{{/showPrecision}}{{^showPrecision}}display:none;{{/showPrecision}}"
    placeholder="Précisez..." />
 
-  {{#requiresSubQst}}
-    <div class="sub-question" style="display:none;">
-      <input type="text" name="sub_{{../id}}_{{codeItem}}" placeholder="Sous-question..." />
-    </div>
-  {{/requiresSubQst}}
+  {{#hasSubQuestions}}
+   <div class="sub-questions"
+    data-parent="{{codeItem}}"
+    style="{{^showSubQuestions}}display:none;{{/showSubQuestions}}">
+  
+  {{#subQuestions}}
+    {{> partials/accQuestion}}
+  {{/subQuestions}}
+
+</div>
+{{/hasSubQuestions}}
+
 {{/options}}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const checkboxes = document.querySelectorAll('input[type=checkbox][name="{{id}}[]"]');
+
+  const checkboxes = document.querySelectorAll(
+    'input[type=checkbox][name="{{id}}[]"]'
+    );
 
   checkboxes.forEach(cb => {
     cb.addEventListener('change', function() {
-      const input = document.querySelector(`input[name=precision_{{id}}_${this.value}]`);
-      input.style.display = this.checked && this.dataset.requiresPrecision==='true' ? 'inline-block' : 'none';
 
-      const subQ = this.closest('form').querySelector(`.sub-question`);
-      if(subQ) subQ.style.display = this.checked ? 'block':'none';
+      /* ************** précision************/
+      const precisionInput = document.querySelector(
+        `input[name=precision_{{id}}_${this.value}]`
+        );
 
-      // Gestion exclusif
+ if (precisionInput) {
+        precisionInput.style.display =
+          this.checked && this.dataset.requiresPrecision === 'true'
+            ? 'inline-block'
+            : 'none';
+      }
+      
+      /* ************** sub question************/
+      const subQ = this.closest('form').querySelector(
+  `.sub-questions[data-parent="${this.value}"]`
+);
+
+if (subQ) {
+  subQ.style.display = this.checked ? 'block' : 'none';
+}
+      // *****************************Gestion exclusif
       if(this.dataset.exclusive==='true' && this.checked){
         checkboxes.forEach(other => {
           if(other !== this){
             other.checked = false;
             other.disabled = true;
-            document.querySelector(`input[name=precision_{{id}}_${other.value}]`).style.display='none';
+
+            //cacher précision
+            document.querySelector(
+              `input[name=precision_{{id}}_${other.value}]`).style.display='none';
+          
+                      // cacher sous-questions
+            const otherSub = document.querySelector(
+              `.sub-questions[data-parent="${other.value}"]`
+            );
+            if (otherSub) otherSub.style.display = 'none';
+
           }
         });
+
       } else if(this.dataset.exclusive!=='true'){
         checkboxes.forEach(excl => {
           if(excl.dataset.exclusive==='true'){
@@ -64,6 +102,14 @@ if (!cb.dataset.requiresPrecision) return;
     if(cb.checked && cb.dataset.requiresPrecision==='true'){
       document.querySelector(`input[name=precision_{{id}}_${cb.value}]`).style.display='inline-block';
     }
+    
+    if (cb.checked) {
+  const subQ = document.querySelector(
+    `.sub-questions[data-parent="${cb.value}"]`
+  );
+  if (subQ) subQ.style.display = 'block';
+}
+
   });
 });
 </script>
