@@ -77,7 +77,7 @@ export default class AnswerPrefillUtils {
       if ( opt.subQuestions) {
         opt.subQuestions.forEach(subQ => {
           const subValue = this.getSubQuestionValue({ parentStep: step, subQuestion: subQ, sessionAnswers });
-          // ✅ Si sub-question single_choice et valeur undefined, ne rien cocher
+          //  Si sub-question single_choice et valeur undefined, ne rien cocher
           if (subQ.type === 'single_choice' && (subValue === undefined || subValue === null || subValue === '')) {
             subQ.options.forEach(o => {
               o.isSelected = false;

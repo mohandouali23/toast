@@ -2,37 +2,106 @@ import ToastService from './ToastService.js';
 
 export default class ValidationService {
   
-  // ---------------- Helper ----------------
-  static validateQuestionRecursive(question, answers, wrapper = null, path = '') {
-  const missingFields = [];
+  // ---------------- Helper récursif pour sous-questions ----------------
+  static validateSubQuestionsRecursive(options = [], answers, wrapper = null, path = '', parentAnswerKey = null) {
+    const missingFields = [];
 
-  // clé de session pour récupérer la réponse
-  const answerKey = wrapper?.optionIndex !== undefined ? `${question.id}_${wrapper.optionIndex}` : question.id;
-  const value = answers[answerKey];
+    options.forEach(opt => {
+      // Récupérer la valeur du parent
+      let parentValue = parentAnswerKey ? answers[parentAnswerKey] : null;
 
-  // Si la question est obligatoire et sans réponse → erreur
-  if (question.required && !ValidationService.hasRealAnswer(value)) {
-    missingFields.push(path ? `${path} > ${question.label || question.id}` : question.label || question.id);
-  }
+      console.log('DEBUG: option', opt.label, 'parentValue', parentValue);
 
-  // Vérifie si la question a des sous-questions
-  if (question.options?.length) {
-    question.options.forEach(opt => {
-      // si la réponse principale correspond à l’option
-      if (Array.isArray(value) ? value.includes(opt.codeItem) : value == opt.codeItem) {
-        if (opt.subQuestions?.length) {
-          opt.subQuestions.forEach(subQ => {
-            // Appel récursif pour valider la sous-question
-            missingFields.push(...ValidationService.validateQuestionRecursive(subQ, answers, wrapper, path ? `${path} > ${question.label}` : question.label));
+      // Vérifier si l’option est sélectionnée dans le parent
+      const isSelected = Array.isArray(parentValue)
+        ? parentValue.some(v => v?.toString() === opt.codeItem?.toString())
+        : parentValue?.toString() === opt.codeItem?.toString();
+
+      console.log('DEBUG: isSelected', isSelected);
+      if (!isSelected) return; // ne pas valider les sous-questions si l’option n’est pas choisie
+
+      if (!opt.subQuestions?.length) return;
+
+      opt.subQuestions.forEach(subQ => {
+
+        // ----- Construire correctement la clé de la sous-question -----
+        let subAnswerKey;
+
+        if (wrapper?.optionIndex !== undefined) {
+          // Cas wrapper (accordion ou liste imbriquée)
+          subAnswerKey = `${subQ.id}_${wrapper.optionIndex}`;
+        } else if (parentAnswerKey) {
+          const parentVal = answers[parentAnswerKey];
+          if (Array.isArray(parentVal)) {
+            // Parent multiple_choice → traiter chaque valeur sélectionnée
+            parentVal.forEach(val => {
+              const key = `${parentAnswerKey}_${val}_${subQ.id}`;
+              const value = answers[key];
+              if (subQ.required && !ValidationService.hasRealAnswer(value)) {
+                missingFields.push(path ? `${path} > ${subQ.label || subQ.id}` : subQ.label || subQ.id);
+                console.log('DEBUG: missingFields pushed (multiple parent)', missingFields[missingFields.length - 1]);
+              }
+
+              // Récursivité sur les options de la sous-question
+              if (subQ.options?.length) {
+                missingFields.push(
+                  ...ValidationService.validateSubQuestionsRecursive(subQ.options, answers, wrapper, path ? `${path} > ${subQ.label}` : subQ.label, key)
+                );
+              }
+            });
+            return; // on a traité toutes les valeurs du parent multiple
+          } else {
+            // Parent single_choice
+            subAnswerKey = `${parentAnswerKey}_${parentVal}_${subQ.id}`;
+          }
+        } else {
+          // Pas de parent
+          subAnswerKey = subQ.id;
+        }
+
+        const value = answers[subAnswerKey];
+        console.log('DEBUG: subQ', subQ.label, 'subAnswerKey', subAnswerKey, 'value', value);
+
+        // Vérifier la sous-question obligatoire
+        if (subQ.required && !ValidationService.hasRealAnswer(value)) {
+          missingFields.push(path ? `${path} > ${subQ.label || subQ.id}` : subQ.label || subQ.id);
+          console.log('DEBUG: missingFields pushed', missingFields[missingFields.length - 1]);
+        }
+
+        // Récursivité sur les options de la sous-question
+        if (subQ.options?.length) {
+          missingFields.push(
+            ...ValidationService.validateSubQuestionsRecursive(subQ.options, answers, wrapper, path ? `${path} > ${subQ.label}` : subQ.label, subAnswerKey)
+          );
+        }
+
+        // Si c’est un accordion
+        if (subQ.type === 'accordion') {
+          (subQ.sections || []).forEach(section => {
+            (section.questions || []).forEach(q => {
+              const qAnswerKey = wrapper?.optionIndex !== undefined ? `${q.id}_${wrapper.optionIndex}` : q.id;
+              const qValue = answers[qAnswerKey];
+              if (q.required && !ValidationService.hasRealAnswer(qValue)) {
+                missingFields.push(`${path ? path + ' > ' : ''}${subQ.label || subQ.id} > ${section.title} > ${q.label || q.id}`);
+                console.log('DEBUG: accordion missingFields pushed', missingFields[missingFields.length - 1]);
+              }
+              if (q.options?.length) {
+                missingFields.push(
+                  ...ValidationService.validateSubQuestionsRecursive(q.options, answers, wrapper, `${path ? path + ' > ' : ''}${subQ.label || subQ.id} > ${section.title}`, qAnswerKey)
+                );
+              }
+            });
           });
         }
-      }
+
+      });
     });
+
+    return missingFields;
   }
 
-  return missingFields;
-}
-
+  // ---------------- Helper ----------------
+  
   static hasRealAnswer(value) {
     if (value === null || value === undefined) return false;
     if (typeof value === 'string') return value.trim() !== '';
@@ -82,9 +151,13 @@ export default class ValidationService {
           break;
           
           default:
-          if (!ValidationService.hasRealAnswer(value)) {
-            missingFields.push(`${section.title} > ${question.label || question.id}`);
-          }
+            if (q.options?.length) {
+              const answerKey = wrapper?.optionIndex !== undefined ? `${q.id}_${wrapper.optionIndex}` : q.id;
+              missingFields.push(
+                ...ValidationService.validateSubQuestionsRecursive(q.options, answers, wrapper, q.label, answerKey)
+              );
+            }
+            
         }
       });
     });
@@ -189,6 +262,13 @@ export default class ValidationService {
         default:
         if (!ValidationService.hasRealAnswer(value)) missingFields.push(q.label || q.id);
       }
+      // Valider récursivement toutes les sous-questions
+      if (q.options?.length) {
+        missingFields.push(
+          ...ValidationService.validateSubQuestionsRecursive(q.options, answers, wrapper, q.label, answerKey)
+        );
+      }
+      
     });
     
     if (missingFields.length > 0) {

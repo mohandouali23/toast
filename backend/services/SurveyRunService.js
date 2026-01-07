@@ -35,9 +35,6 @@ export default class SurveyRunService {
         
         this.pushCurrentStepToHistory(session, currentStep, isInRotation,currentStepWrapper);
       }
-      // console.log("history",
-      //   session.history.map(h => h.id)
-      // );
       if (action === 'prev') {
         const prevStepId = this.handlePrevious(session);
         if (prevStepId) return { nextStep: { id: prevStepId } };
@@ -47,15 +44,7 @@ export default class SurveyRunService {
       if (!nextStepId || nextStepId === 'FIN') return { finished: true };
       
       session.currentStepId = nextStepId;
-      // console.log("session",session)
-      // console.log('🧭 QUESTION AFFICHÉE');
-      // console.log('➡️ currentStepId:', nextStepId);
-      // console.log('📜 history (ordre):', session.history.map(h => ({
-        //   id: h.id,
-      //   isRotation: h.isRotation,
-      //   parent: h.wrapper?.parent
-      // })));
-      
+    
       return { nextStep: { id: nextStepId } };
     }
     

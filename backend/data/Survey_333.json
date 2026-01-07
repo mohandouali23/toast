@@ -668,6 +668,7 @@
     "type": "single_choice",
     "title": "Q24_77.",
     "label": "  sub qst?",
+    "required": true,
     "options": [
       {
         "codeItem": 4,
@@ -695,6 +696,7 @@
     "title": "Q24_7.",
     "type": "multiple_choice",
     "label": "Quels transports utilisez-vous  sub qst?",
+    "required": true,
     "options": [
       {
         "codeItem": 1,
@@ -744,6 +746,7 @@
     "title": "Q25_88.",
     "type": "single_choice",
     "label": "  sub qst?",
+    "required": true,
     "options": [
       {
         "codeItem": 4,
