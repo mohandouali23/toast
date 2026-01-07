@@ -14,7 +14,7 @@
       "label": "Quel est votre moyen de transport principal ttt ?",
       "placeholder": "Ex : Bus, Train, Voiture...",
       "help_text": "Indiquez le moyen que vous utilisez le plus souvent",
-      "redirection": "q3",
+      "redirection": "q25",
       "input_cond": "",
       "output_cond": "value.length > 0",
       "required": true,
@@ -622,6 +622,76 @@
   "id_db": "KO3HT8"
 },
 
+{"id_db": "KO6H25",
+"id": "q25",
+"type": "multiple_choice",
+"label": "TEST  du transport en commun",
+"redirection": "q8",
+"required": true,
+"options": [
+  {
+    "codeItem": 1,
+    "label": "avion"
+},
+{
+  "codeItem": 2,
+  "label": "car",
+  "subQuestions": [
+    {"id_db": "KO3A23",
+    "id": "q25_CAR",
+    "type": "single_choice",
+    "label": "  sub qst?",
+    "options": [
+      {
+        "codeItem": 4,
+        "label": "A multipl"
+      },
+      {
+        "codeItem": 8,
+        "label": " S mul",
+        "requiresPrecision": true
+      },
+      {
+        "codeItem": 11,
+        "label": "z mul"
+      }
+    ]
+  }
+]
+},
+{
+  "codeItem": 7,
+  "label": "fly",
+  "subQuestions": [
+    {"id_db": "ST3T8U",
+    "id": "q25_F",
+    "type": "multiple_choice",
+    "label": "Quels transports utilisez-vous  sub qst?",
+    "options": [
+      {
+        "codeItem": 1,
+        "label": "BusS"
+      },
+      {
+        "codeItem": 2,
+        "label": "Train S",
+        "requiresPrecision": true
+      },
+      {
+        "codeItem": 3,
+        "label": "Voiture S"
+      },
+      {
+        "codeItem": 6,
+        "label": "Aucun S",
+        "exclusive": true
+      }
+    ]
+  }
+]
+}
+]
+},
 {"id_db": "KO6HT8",
 "id": "q24",
 "type": "single_choice",
