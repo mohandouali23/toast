@@ -55,13 +55,22 @@ export const runSurveyPage = (req, res) => {
   
   const currentStep = getCurrentStep(req, survey);
   if (!currentStep) return res.redirect(`/survey/${surveyId}/end`);
-  
   const currentPage = currentStep.page;
+
+  // pages existantes triées
+  const pages = [...new Set(
+    survey.steps
+      .filter(s => s.page !== undefined)
+      .map(s => s.page)
+  )].sort((a, b) => a - b);
+
+  const isFirstPage = currentPage === pages[0];
+
   const stepsOnPage = getStepsForPage(req, survey, currentPage);
   
   const options = [];
   const preparedSteps = prepareSteps(stepsOnPage, req.session.answers, options,req.session.rotationQueue || []);
-  renderSurveyPage(res, survey, currentPage, preparedSteps, options);
+  renderSurveyPage(res, survey, currentPage, preparedSteps, options,isFirstPage);
 };
 
 
@@ -164,14 +173,15 @@ function prefillRotationStep(step, sessionAnswers) {
 }
 
 // Rendu final de la page
-function renderSurveyPage(res, survey, page, steps, options) {
-  res.render('questions/page', { survey, steps, options }, (err, html) => {
+function renderSurveyPage(res, survey, page, steps, options,isFirstPage) {
+  res.render('questions/page', { survey, steps, options,isFirstPage}, (err, html) => {
     if (err) return res.status(500).send('Erreur rendu page');
     
     res.render('layout', {
       survey,
       step: { id: `page-${page}`, type: 'page', title: survey.title },
-      content: html
+      content: html,
+      isFirstPage
     });
   });
 }

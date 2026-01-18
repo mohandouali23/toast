@@ -572,7 +572,7 @@ static computeRotationKeysToDelete({ step,sessionAnswers, previousSelected = [],
       if (previousStep.isRotation && previousStep.wrapper) {
         const parentId = previousStep.wrapper.parent;
 
-   // IMPORTANT : Réinitialiser le flag de rotation terminée
+   //  Réinitialiser le flag de rotation terminée
    if (session.rotationQueueDone?.[parentId]) {
     delete session.rotationQueueDone[parentId];
   }
@@ -617,6 +617,21 @@ static computeRotationKeysToDelete({ step,sessionAnswers, previousSelected = [],
       // ============================================================================
       // -------------------- NAVIGATION --------------------
       static resolveNextStep(session, survey, currentStep, isInRotation) {
+        // 1 NAVIGATION CONDITIONNELLE D’ABORD
+  const navigationTarget = NavigationRuleService.resolve(
+    currentStep,
+    session.answers,
+    survey.steps
+  );
+
+  // Si la navigation n’est PAS la redirection par défaut → priorité absolue
+  if (
+    navigationTarget &&
+    navigationTarget !== currentStep.redirection
+  ) {
+    return navigationTarget;
+  }
+       
         // Réinitialiser si nécessaire
   RotationService.resetRotationIfNeeded(session,survey, currentStep.id, session.answers);
         
@@ -633,12 +648,14 @@ static computeRotationKeysToDelete({ step,sessionAnswers, previousSelected = [],
         const rotationAdvance = RotationService.advanceRotation({ session, survey, currentStep, action: 'next' });
         if (rotationAdvance?.nextStepId) return rotationAdvance.nextStepId;
         
-        if (rotationAdvance?.fallbackFrom) {
-          return NavigationRuleService.resolve(rotationAdvance.fallbackFrom, session.answers[rotationAdvance.fallbackFrom.id], survey.steps);
-        }
+        // if (rotationAdvance?.fallbackFrom) {
+        //   return NavigationRuleService.resolve(rotationAdvance.fallbackFrom, session.answers[rotationAdvance.fallbackFrom.id], survey.steps);
+        // }
         
-        // return NavigationRuleService.resolve(currentStep, session.answers[currentStep.id], survey.steps);
-        return NavigationRuleService.resolve(currentStep, session.answers, survey.steps);  
+        // // return NavigationRuleService.resolve(currentStep, session.answers[currentStep.id], survey.steps);
+        // return NavigationRuleService.resolve(currentStep, session.answers, survey.steps);  
+      // FALLBACK NORMAL
+  return navigationTarget;
       }
       
     }

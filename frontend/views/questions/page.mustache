@@ -17,7 +17,9 @@
 
   
   <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-    <button type="submit" name="_action" value="prev" style="background-color:#6c757d; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; font-size:16px;">
+    <button type="submit" name="_action" value="prev" {{#isFirstPage}}disabled{{/isFirstPage}} 
+    style="background-color:#6c757d; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; font-size:16px; opacity: {{#isFirstPage}}0.5{{/isFirstPage}}{{^isFirstPage}}1{{/isFirstPage}};
+  ">
       Précédent
     </button>
 

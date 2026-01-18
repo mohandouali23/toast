@@ -190,7 +190,7 @@ export default class RotationService {
   }
   }
 
-  // Dans RotationService.js
+
 static resetRotationIfNeeded(session,survey, currentStepId, answers) {
   // Vérifier si on est sur une question parent qui a une rotation
   const parentStep = survey.steps.find(step => step.id === currentStepId);
