@@ -90,17 +90,18 @@ export default class RotationService {
   
       const parentId = step.repeatFor;
       if (!parentId || !answers[parentId]) continue;
-  
-   // Vérifier si on doit régénérer la queue : 
-        // - jamais générée
-        // - ou réponse parent modifiée
-        const needToGenerate = session.rotationState?.[parentId]?.needsRefresh;
-
-        if (!needToGenerate) continue;
-     
-  
+      // MODIFICATION : Détecter si une rotation devrait être lancée
+      const hasRotation = session.rotationState?.[parentId]?.hasRotation;
+      const rotationDone = session.rotationQueueDone?.[parentId];
+      
+      // Conditions pour lancer une rotation :
+      // 1. Réponse au parent existe
+      // 2. Pas de rotation en cours
+      // 3. Rotation non déjà terminée pour cette réponse
+      // 4. Pas de rotation déjà active
+      if (!session.rotationQueue && !rotationDone) {
         const queue = generateQueue(survey, parentId, answers);
-  
+      
         // S'il n'y a rien à répéter → rotation vide
         if (queue.length === 0) {
           session.rotationQueueDone[parentId] = true; // marque comme traitée
@@ -133,7 +134,7 @@ export default class RotationService {
         };
       
     }
-  
+    }
     return null;
   }
     // ==========================================================================
@@ -189,84 +190,26 @@ export default class RotationService {
   }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // static initRotation({ session, survey, answers, action, generateQueue }) {
-
-  //   // Une rotation ne démarre que sur "next" et si aucune rotation active
-  //   if (action !== 'next' || session.rotationQueue) return null;
-
-  //   // Parcours de tous les steps pour détecter une rotation à déclencher
-  //   for (const step of survey.steps) {
-
-  //     const parentId = step.repeatFor;
-
-  //     if (
-  //       parentId &&
-  //       answers[parentId] &&
-  //       !session.rotationQueueDone[parentId]
-  //     ) {
-
-  //       // Génération de la file de rotation
-  //       const queue = RotationQueueUtils.generateRotationQueue(
-  //         survey,
-  //         parentId,
-  //         answers
-  //       );
-
-  //       // Marquer cette rotation comme déjà traitée
-  //       session.rotationQueueDone[parentId] = true;
-
-  //       // --------------------------------------------------
-  //       // Cas : rotation exclusive (aucune entrée)
-  //       // --------------------------------------------------
-  //       if (queue.length === 0) {
-  //         const parent = survey.steps.find(s => s.id === parentId);
-
-  //         return {
-  //           type: 'NO_ROTATION',
-  //           nextStepId: parent?.redirection || 'FIN'
-  //         };
-  //       }
-
-  //       // --------------------------------------------------
-  //       // Cas : rotation normale
-  //       // --------------------------------------------------
-  //       session.rotationQueue = queue;
-  //       session.currentStepId = queue[0].step.id;
-
-  //       // Historisation immédiate du premier step de rotation
-  //       session.history.push({
-  //         id: queue[0].step.id,
-  //         isRotation: true,
-  //         wrapper: queue[0]
-  //       });
-
-  //       return {
-  //         type: 'ROTATION_STARTED',
-  //         nextStepId: queue[0].step.id
-  //       };
-  //     }
-  //   }
-
-  //   return null;
-  // }
-
-
+  // Dans RotationService.js
+static resetRotationIfNeeded(session,survey, currentStepId, answers) {
+  // Vérifier si on est sur une question parent qui a une rotation
+  const parentStep = survey.steps.find(step => step.id === currentStepId);
+  
+  if (!parentStep || !parentStep.options) return;
+  
+  // Vérifier si cette question a déjà lancé une rotation
+  const rotationState = session.rotationState?.[currentStepId];
+  
+  if (rotationState) {
+    // Vérifier si la réponse a changé
+    const currentAnswer = answers[currentStepId];
+    const originalAnswer = rotationState.originalAnswer;
+    
+    if (JSON.stringify(currentAnswer) !== JSON.stringify(originalAnswer)) {
+      // La réponse a changé, on peut relancer une rotation
+      delete session.rotationState[currentStepId];
+      delete session.rotationQueueDone[currentStepId];
+    }
+  }
+}
 }

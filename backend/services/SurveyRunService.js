@@ -53,10 +53,7 @@ export default class SurveyRunService {
         responseId, 
         session, 
         isInRotation });
-        
-        // const isStepValid = ValidationService.validateStep(currentStep, session.answers, currentStepWrapper);
-        // if (!isStepValid) return { nextStep: { id: currentStep.id }, validationError: true };
-        
+      
         const isStepValid = ValidationService.validateStep(currentStep, session.answers, currentStepWrapper);
 
 if (!isStepValid) {
@@ -160,7 +157,7 @@ if (!isStepValid) {
         mainValue === '' ||
         (Array.isArray(mainValue) && mainValue.length === 0)
       ) {
-       // console.log('⛔ normalized vide → skip save', step.id);
+       // console.log(' normalized vide → skip save', step.id);
         
         return;
       }
@@ -287,7 +284,6 @@ if (step.rotationTemplate?.length) {
     // reset rotation state
     delete session.rotationQueue;
     delete session.rotationQueueDone[step.id];
-   //delete session.rotationState?.[step.id];
  
   }
 }
@@ -421,49 +417,7 @@ if (step.rotationTemplate?.length) {
     
     return keysToDelete;
   }
-//   static computeRotationKeysToDelete({ step, sessionAnswers, allSteps }) {
-   
-//     const dbKeysToDelete = [];
-//     const sessionKeysToDelete = [];
-  
-//     Object.keys(sessionAnswers).forEach(sessionKey => {
-//       console.log("sessionAnswers de computeRotationKeysToDelete ",sessionAnswers)
-//       console.log("step.id",step.id)
-//       // q3_1_1, q3_2_1 ...
-//       if (!sessionKey.startsWith(`${step.id}_`)) return;
-  
-//       sessionKeysToDelete.push(sessionKey);
-  
-//       // 🔹 construire la clé DB correcte
-//       const wrapperStep = step.wrapper?.step || step; // sous-question réelle
-//       const optionCode = sessionKey.split('_')[2];   // ex: '1'
-//  // console.log("sessionKey",sessionKey)
-//  // console.log("optionCode",optionCode)
-//  // console.log("wrapperStep",wrapperStep)
-//       // vérifier si c’est la sous-question correspondante
-//       // if (wrapperStep.id_db) {
-//       //   dbKeysToDelete.push(`${wrapperStep.id_db}_${optionCode}`);
-//       // }
-//         //  Si rotationTemplate existe, récupérer les steps correspondants
-//     if (step.rotationTemplate?.length) {
-//       step.rotationTemplate.forEach(rotId => {
-//         const rotStep = allSteps.find(s => s.id === rotId);
-//         if (rotStep?.id_db) {
-//           dbKeysToDelete.push(`${rotStep.id_db}_${optionCode}`);
-//         }
-//       });
-//     } else if (step.id_db) {
-//       // fallback : parent
-//       dbKeysToDelete.push(`${step.id_db}_${optionCode}`);
-//     }
-//     });
-  
-//     return {
-//       dbKeysToDelete: [...new Set(dbKeysToDelete)],
-//       sessionKeysToDelete: [...new Set(sessionKeysToDelete)]
-//     };
-//   }
-  
+
 static computeRotationKeysToDelete({ step,sessionAnswers, previousSelected = [], allSteps }) {
   const dbKeysToDelete = [];
   const sessionKeysToDelete = [];
@@ -614,11 +568,27 @@ static computeRotationKeysToDelete({ step,sessionAnswers, previousSelected = [],
       
       const previousStep = session.history[lastIndex];
       if (!previousStep) return null;
-      //console.log("previousstep",previousStep)
-      //console.log("session.rotationQueue before",session.rotationQueue)
       // Gestion des rotations
       if (previousStep.isRotation && previousStep.wrapper) {
         const parentId = previousStep.wrapper.parent;
+
+   // IMPORTANT : Réinitialiser le flag de rotation terminée
+   if (session.rotationQueueDone?.[parentId]) {
+    delete session.rotationQueueDone[parentId];
+  }
+  
+  // Réinitialiser l'état de rotation
+  if (session.rotationState?.[parentId]) {
+    // Conserver seulement si la réponse n'a pas changé
+    const currentAnswer = session.answers[parentId];
+    const originalAnswer = session.rotationState[parentId].originalAnswer;
+    
+    if (JSON.stringify(currentAnswer) !== JSON.stringify(originalAnswer)) {
+      delete session.rotationState[parentId];
+    }
+  }
+  
+
         // On récupère TOUTES les rotations du parent
         const allRotations = RotationQueueUtils.getAllRotationsForParent(session, parentId);
         
@@ -647,7 +617,8 @@ static computeRotationKeysToDelete({ step,sessionAnswers, previousSelected = [],
       // ============================================================================
       // -------------------- NAVIGATION --------------------
       static resolveNextStep(session, survey, currentStep, isInRotation) {
-        
+        // Réinitialiser si nécessaire
+  RotationService.resetRotationIfNeeded(session,survey, currentStep.id, session.answers);
         
         const rotationInit = RotationService.initRotation({
           session,

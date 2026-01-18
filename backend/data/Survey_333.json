@@ -689,7 +689,7 @@
 "title": "Q24.",
 "type": "single_choice",
 "label": "Fréquence d’utilisation du transport en commun",
-"redirection": "q8",
+"redirection": "q25",
 "page":56,
 "required": true,
 "options": [
